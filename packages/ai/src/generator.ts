@@ -11,6 +11,8 @@ import {
 import type { ContentProvider, GenerationContext } from './types.js'
 import { composeSkills } from './composer.js'
 import { ClaudeContentProvider } from './providers/claude.js'
+import { OpenAIContentProvider } from './providers/openai.js'
+import { GeminiContentProvider } from './providers/gemini.js'
 import { MockContentProvider } from './providers/mock.js'
 
 const currentDir = dirname(fileURLToPath(import.meta.url))
@@ -25,6 +27,12 @@ function loadSystemPrompt(): string {
 }
 
 export function getDefaultContentProvider(): ContentProvider {
+  if (process.env.GEMINI_API_KEY) {
+    return new GeminiContentProvider()
+  }
+  if (process.env.OPENAI_API_KEY) {
+    return new OpenAIContentProvider()
+  }
   if (process.env.ANTHROPIC_API_KEY) {
     return new ClaudeContentProvider()
   }
@@ -36,8 +44,7 @@ export function getDefaultContentProvider(): ContentProvider {
     return new MockContentProvider()
   }
   throw new Error(
-    'ANTHROPIC_API_KEY não definida. Copie .env.example para .env e preencha. ' +
-    'Para usar o provedor falso de propósito: ZAPOST_ALLOW_MOCK=1'
+    'Nenhuma chave de IA configurada (GEMINI_API_KEY, OPENAI_API_KEY ou ANTHROPIC_API_KEY). Preencha o .env.'
   )
 }
 

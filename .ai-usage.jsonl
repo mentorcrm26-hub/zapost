@@ -10,3 +10,9 @@
 {"timestamp":"2026-09-08T00:27:16.194Z","provider":"anthropic","model":"claude-sonnet-5","action":"content_generation","inputTokens":3738,"outputTokens":724,"costUsd":0.014716,"success":true}
 {"timestamp":"2026-09-08T00:47:05.088Z","provider":"anthropic","model":"claude-sonnet-5","action":"content_generation","inputTokens":3727,"outputTokens":653,"costUsd":0.013984,"success":true}
 {"timestamp":"2026-09-08T00:47:53.259Z","provider":"anthropic","model":"claude-sonnet-5","action":"content_generation","inputTokens":3723,"outputTokens":488,"costUsd":0.012326,"success":true}
+{"timestamp":"2026-09-08T02:49:42.074Z","provider":"openai","model":"gpt-4o","action":"content_generation","costUsd":0,"success":false}
+{"timestamp":"2026-09-08T02:55:14.869Z","provider":"gemini","model":"gemini-3.6-flash","action":"content_generation","costUsd":0,"success":false}
+{"timestamp":"2026-09-08T02:55:46.604Z","provider":"gemini","model":"gemini-3.6-flash","action":"content_generation","inputTokens":1493,"outputTokens":513,"costUsd":0.0001,"success":true}
+{"timestamp":"2026-09-08T02:55:47.277Z","provider":"gemini","model":"gemini-3.6-flash","action":"content_generation","inputTokens":1493,"outputTokens":549,"costUsd":0.0001,"success":true}
+{"timestamp":"2026-09-08T02:56:29.805Z","provider":"gemini","model":"gemini-3.5-flash","action":"content_generation","inputTokens":1492,"outputTokens":543,"costUsd":0.0001,"success":true}
+{"timestamp":"2026-09-08T02:58:03.676Z","provider":"gemini","model":"gemini-3.5-flash","action":"content_generation","inputTokens":83,"outputTokens":317,"costUsd":0.0001,"success":true}
