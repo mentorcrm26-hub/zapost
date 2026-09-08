@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZaPost — Visualizador de Criativos & Simulação</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0b0f17;
+      --bg-card: rgba(23, 30, 46, 0.7);
+      --border-card: rgba(255, 255, 255, 0.08);
+      --accent-green: #10b981;
+      --accent-emerald: #059669;
+      --accent-gold: #f59e0b;
+      --accent-blue: #3b82f6;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --radius-lg: 16px;
+      --radius-sm: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.1) 0px, transparent 50%);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      padding: 32px 24px;
+    }
+
+    .container {
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border-card);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-badge {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 20px;
+      padding: 6px 14px;
+      border-radius: 10px;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+    }
+
+    .brand h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .brand p {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .nav-tabs {
+      display: flex;
+      background: rgba(15, 23, 42, 0.8);
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid var(--border-card);
+      gap: 4px;
+    }
+
+    .nav-tab {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .nav-tab.active {
+      background: #1e293b;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Filters Bar */
+    .controls-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-card);
+      padding: 16px 20px;
+      border-radius: var(--radius-lg);
+      margin-bottom: 32px;
+      gap: 16px;
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .filter-label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    .btn-toggle-group {
+      display: flex;
+      background: #0f172a;
+      border-radius: 8px;
+      padding: 3px;
+      border: 1px solid var(--border-card);
+    }
+
+    .btn-toggle {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-toggle.active {
+      background: var(--accent-emerald);
+      color: white;
+    }
+
+    /* Grid de Criativos */
+    .creatives-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 28px;
+      margin-bottom: 40px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(16, 185, 129, 0.4);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-header {
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-card);
+    }
+
+    .template-badge {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-bold { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+    .badge-overlay { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+    .badge-split { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+
+    .card-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .preview-stage {
+      background: #000;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 440px;
+    }
+
+    .preview-img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      transition: transform 0.2s ease;
+      cursor: zoom-in;
+    }
+
+    .preview-img:hover {
+      transform: scale(1.02);
+    }
+
+    .card-body {
+      padding: 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .caption-box {
+      background: #0f172a;
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #e2e8f0;
+      position: relative;
+    }
+
+    .caption-box p {
+      margin-bottom: 8px;
+    }
+
+    .caption-box .tags {
+      color: #38bdf8;
+      font-size: 12px;
+    }
+
+    .btn-copy {
+      background: #1e293b;
+      color: var(--text-main);
+      border: 1px solid var(--border-card);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-copy:hover {
+      background: var(--accent-emerald);
+      color: white;
+    }
+
+    /* Modal de Imagem Fullscreen */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal img {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: 12px;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Tab de Chat Simulador */
+    .chat-simulator {
+      display: none;
+      max-width: 760px;
+      margin: 0 auto;
+      background: #111827;
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
+    }
+
+    .chat-header {
+      background: #1f2937;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border-card);
+    }
+
+    .chat-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #10b981;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .chat-messages {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    .msg {
+      max-width: 80%;
+      padding: 12px 16px;
+      border-radius: 14px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .msg-bot {
+      align-self: flex-start;
+      background: #1f2937;
+      color: #f3f4f6;
+      border-bottom-left-radius: 2px;
+    }
+
+    .msg-user {
+      align-self: flex-end;
+      background: #059669;
+      color: white;
+      border-bottom-right-radius: 2px;
+    }
+
+    .chat-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .chat-btn {
+      background: #374151;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="logo-badge">ZaPost</div>
+        <div>
+          <h1>Central de Visualização & Validação</h1>
+          <p>Micro-SaaS de Criativos Automatizados para Empreendedores nos EUA</p>
+        </div>
+      </div>
+      <div class="nav-tabs">
+        <button class="nav-tab active" onclick="switchView('gallery')">🖼️ Galeria de Criativos</button>
+        <button class="nav-tab" onclick="switchView('chat')">💬 Simulador de Conversa</button>
+      </div>
+    </header>
+
+    <!-- Visualização 1: Galeria -->
+    <div id="gallery-view">
+      <div class="controls-bar">
+        <!-- Filtro Idioma -->
+        <div class="filter-group">
+          <span class="filter-label">Idioma:</span>
+          <div class="btn-toggle-group">
+            <button class="btn-toggle active" onclick="setLanguage('pt')">🇧🇷 Português</button>
+            <button class="btn-toggle" onclick="setLanguage('en')">🇺🇸 Inglês</button>
+          </div>
+        </div>
+
+        <!-- Filtro Formato -->
+        <div class="filter-group">
+          <span class="filter-label">Formato:</span>
+          <div class="btn-toggle-group">
+            <button class="btn-toggle active" onclick="setFormat('feed_45')">📱 Feed (4:5)</button>
+            <button class="btn-toggle" onclick="setFormat('story_916')">🎬 Story (9:16)</button>
+          </div>
+        </div>
+
+        <!-- Filtro Versão (Final vs Preview com Marca d'água) -->
+        <div class="filter-group">
+          <span class="filter-label">Modo:</span>
+          <div class="btn-toggle-group">
+            <button class="btn-toggle active" onclick="setMode('final')">✨ Alta Resolução (Final)</button>
+            <button class="btn-toggle" onclick="setMode('preview')">🔒 Prévia (Marca d'água)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid de Templates -->
+      <div class="creatives-grid">
+        
+        <!-- Template 1: bold-price -->
+        <div class="card">
+          <div class="card-header">
+            <span class="template-badge badge-bold">Template 1: Bold Price</span>
+            <span class="card-meta">Preço Gigante & Destaque</span>
+          </div>
+          <div class="preview-stage">
+            <img id="img-bold-price" class="preview-img" src="out/bold-price_feed_45_pt.png" alt="Bold Price" onclick="openModal(this.src)">
+          </div>
+          <div class="card-body">
+            <div class="caption-box">
+              <p id="caption-bold-price">Essa semana tem promoção especial de limpeza em Framingham! 🧽✨ Sua casa impecável por apenas $120.</p>
+              <div id="tags-bold-price" class="tags">#limpeza #framingham #faxina #massachusetts</div>
+              <button class="btn-copy" onclick="copyText('caption-bold-price')">📋 Copiar Legenda</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Template 2: photo-overlay -->
+        <div class="card">
+          <div class="card-header">
+            <span class="template-badge badge-overlay">Template 2: Photo Overlay</span>
+            <span class="card-meta">Foto Imersiva c/ Gradiente</span>
+          </div>
+          <div class="preview-stage">
+            <img id="img-photo-overlay" class="preview-img" src="out/photo-overlay_feed_45_pt.png" alt="Photo Overlay" onclick="openModal(this.src)">
+          </div>
+          <div class="card-body">
+            <div class="caption-box">
+              <p id="caption-photo-overlay">Deixe sua casa brilhando com a equipe de confiança da Bella Clean em Framingham! ✨🧹</p>
+              <div id="tags-photo-overlay" class="tags">#limpezaresidencial #bellaclean #massachusetts</div>
+              <button class="btn-copy" onclick="copyText('caption-photo-overlay')">📋 Copiar Legenda</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Template 3: clean-split -->
+        <div class="card">
+          <div class="card-header">
+            <span class="template-badge badge-split">Template 3: Clean Split</span>
+            <span class="card-meta">Divisão Elegante & Legibilidade</span>
+          </div>
+          <div class="preview-stage">
+            <img id="img-clean-split" class="preview-img" src="out/clean-split_feed_45_pt.png" alt="Clean Split" onclick="openModal(this.src)">
+          </div>
+          <div class="card-body">
+            <div class="caption-box">
+              <p id="caption-clean-split">Atendimento com pontualidade e excelência em Framingham e região. Faça seu agendamento! 📲</p>
+              <div id="tags-clean-split" class="tags">#housecleaning #framingham #faxinageral</div>
+              <button class="btn-copy" onclick="copyText('caption-clean-split')">📋 Copiar Legenda</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Visualização 2: Chat Simulator -->
+    <div id="chat-view" class="chat-simulator">
+      <div class="chat-header">
+        <div class="chat-avatar">🤖</div>
+        <div>
+          <h3 style="font-size: 16px; font-weight: 700;">ZaPost Bot (Telegram / WhatsApp)</h3>
+          <p style="font-size: 12px; color: #10b981;">● Online (Máquina de Estados Fase 3)</p>
+        </div>
+      </div>
+      <div class="chat-messages">
+        <div class="msg msg-user">📸 [Envia Foto da Sala Limpa]</div>
+        <div class="msg msg-bot">Recebi sua foto! 📸 Agora manda um áudio ou escreve o que você quer divulgar.</div>
+        <div class="msg msg-user">🎙️ <i>"Oi, queria divulgar limpeza de casa pra essa semana por 120 dólares em Framingham"</i></div>
+        <div class="msg msg-bot">
+          Qual é o objetivo principal desse post?
+          <div class="chat-buttons">
+            <div class="chat-btn">📢 Divulgar serviço</div>
+            <div class="chat-btn" style="background: #059669;">🏷️ Fazer promoção (Selecionado)</div>
+            <div class="chat-btn">✨ Trabalho feito</div>
+          </div>
+        </div>
+        <div class="msg msg-bot">
+          Tem algum preço ou oferta especial pra colocar no post?
+          <div class="chat-buttons">
+            <div class="chat-btn" style="background: #059669;">✅ Falei no áudio ($120)</div>
+            <div class="chat-btn">🚫 Sem preço</div>
+          </div>
+        </div>
+        <div class="msg msg-bot">
+          📋 <b>Dá uma olhada no resumo antes de gerar:</b><br><br>
+          • <b>Objetivo:</b> Promoção com preço<br>
+          • <b>Preço:</b> $120<br>
+          • <b>Empresa:</b> Bella Clean (Framingham, MA)<br>
+          • <b>Redes:</b> Instagram, WhatsApp Status<br>
+          • <b>Idiomas:</b> Português e Inglês 🇺🇸🇧🇷<br><br>
+          Tudo certo pra gerar as 3 opções?
+          <div class="chat-buttons">
+            <div class="chat-btn" style="background: #059669;">⚡ Sim, pode gerar!</div>
+            <div class="chat-btn">❌ Quero mudar algo</div>
+          </div>
+        </div>
+        <div class="msg msg-bot">
+          Tô fazendo, me dá 40 segundos ⏳<br><br>
+          Pronto! Criei 3 opções pra você escolher a que mais gosta 👇<br>
+          <i>(3 prévias com marca d'água enviadas)</i>
+          <div class="chat-buttons">
+            <div class="chat-btn" style="background: #059669;">1️⃣ Opção 1 (Preço Gigante)</div>
+            <div class="chat-btn">2️⃣ Opção 2 (Foto c/ Gradiente)</div>
+            <div class="chat-btn">3️⃣ Opção 3 (Divisão Limpa)</div>
+          </div>
+        </div>
+        <div class="msg msg-bot">
+          Aprovado! ⚡ Gerando seus arquivos em alta resolução em Português e Inglês...<br><br>
+          📦 Feed (🇧🇷 Português) — bold-price_feed_45_pt.png<br>
+          📦 Feed (🇺🇸 Inglês) — bold-price_feed_45_en.png<br>
+          📦 Story (🇧🇷 Português) — bold-price_story_916_pt.png<br>
+          📦 Story (🇺🇸 Inglês) — bold-price_story_916_en.png<br><br>
+          ✨ <b>Legendas prontas para copiar e postar!</b>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Modal -->
+  <div id="image-modal" class="modal" onclick="closeModal()">
+    <img id="modal-img" src="" alt="Zoom">
+  </div>
+
+  <script>
+    let currentLang = 'pt';
+    let currentFormat = 'feed_45';
+    let currentMode = 'final';
+
+    const captions = {
+      pt: {
+        bold: "Essa semana tem promoção especial de limpeza em Framingham! 🧽✨ Sua casa impecável por apenas $120. Vagas limitadas, corre pra garantir seu horário! 🏡💦",
+        tagsBold: "#limpeza #framingham #faxina #limpezaresidencial #massachusetts",
+        overlay: "Deixe sua casa brilhando com a equipe de confiança da Bella Clean em Framingham! ✨🧹 Agende sua faxina com qualidade garantida.",
+        tagsOverlay: "#limpezaresidencial #bellaclean #massachusetts #deepclean",
+        split: "Atendimento com pontualidade e excelência em Framingham e região. Faça seu agendamento direto pelo WhatsApp! 📲",
+        tagsSplit: "#housecleaning #framingham #faxinageral #limpeza"
+      },
+      en: {
+        bold: "Special offer this week in Framingham! 🧽✨ Get your home spotless for just $120. Spots are limited, so text us today to book your spot! 🏡💦",
+        tagsBold: "#housecleaning #framingham #cleaningservice #massachusetts #deepclean",
+        overlay: "Make your home shine with Bella Clean in Framingham, MA! ✨🧹 Top quality residential cleaning you can trust.",
+        tagsOverlay: "#homecleaning #framinghamma #residentialcleaning #cleaningservices",
+        split: "Reliable, high-quality house cleaning in Framingham and nearby areas. Book your appointment today! 📲",
+        tagsSplit: "#cleaningservice #framingham #housekeeping #maidservice"
+      }
+    };
+
+    function updateImages() {
+      const templates = ['bold-price', 'photo-overlay', 'clean-split'];
+      
+      templates.forEach(t => {
+        const img = document.getElementById(`img-${t}`);
+        if (!img) return;
+
+        if (currentMode === 'preview') {
+          img.src = `out/${t}_feed_45_pt_preview.png`;
+        } else {
+          img.src = `out/${t}_${currentFormat}_${currentLang}.png`;
+        }
+      });
+
+      // Atualiza legendas
+      const data = captions[currentLang];
+      document.getElementById('caption-bold-price').innerText = data.bold;
+      document.getElementById('tags-bold-price').innerText = data.tagsBold;
+      document.getElementById('caption-photo-overlay').innerText = data.overlay;
+      document.getElementById('tags-photo-overlay').innerText = data.tagsOverlay;
+      document.getElementById('caption-clean-split').innerText = data.split;
+      document.getElementById('tags-clean-split').innerText = data.tagsSplit;
+    }
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      event.target.parentElement.querySelectorAll('.btn-toggle').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      updateImages();
+    }
+
+    function setFormat(fmt) {
+      currentFormat = fmt;
+      event.target.parentElement.querySelectorAll('.btn-toggle').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      updateImages();
+    }
+
+    function setMode(mode) {
+      currentMode = mode;
+      event.target.parentElement.querySelectorAll('.btn-toggle').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      updateImages();
+    }
+
+    function switchView(view) {
+      const gallery = document.getElementById('gallery-view');
+      const chat = document.getElementById('chat-view');
+      const tabs = document.querySelectorAll('.nav-tab');
+
+      if (view === 'gallery') {
+        gallery.style.display = 'block';
+        chat.style.display = 'none';
+        tabs[0].classList.add('active');
+        tabs[1].classList.remove('active');
+      } else {
+        gallery.style.display = 'none';
+        chat.style.display = 'block';
+        tabs[0].classList.remove('active');
+        tabs[1].classList.add('active');
+      }
+    }
+
+    function openModal(src) {
+      const modal = document.getElementById('image-modal');
+      const img = document.getElementById('modal-img');
+      img.src = src;
+      modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('image-modal').style.display = 'none';
+    }
+
+    function copyText(elementId) {
+      const text = document.getElementById(elementId).innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Legenda copiada para a área de transferência! ✅');
+      });
+    }
+  </script>
+</body>
+</html>
