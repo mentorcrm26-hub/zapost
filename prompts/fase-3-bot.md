@@ -24,8 +24,11 @@ Entregas:
      sendButtons(text, botoes[])     // no máximo 3 por mensagem
      sendImages(urls[], legenda)
      sendFile(url, nome)
-   Implemente Telegram agora (grátis, funciona em horas, botões inline nativos) e
-   deixe a de WhatsApp Cloud API pronta na estrutura, mesmo que ainda sem credencial.
+   Implemente Telegram agora, com qualidade de PRODUÇÃO — não como rascunho de
+   desenvolvimento. A conta Meta do dono está restrita e o acesso ao WhatsApp
+   Cloud API ainda não está resolvido, então o Telegram pode ser o canal de
+   lançamento. Trate erro, timeout, reenvio e limite de taxa como se fosse.
+   Deixe a implementação de WhatsApp Cloud API pronta na estrutura, sem credencial.
 
 3. O briefing dentro da conversa, seguindo o desenho do produto:
      - uma pergunta por mensagem, nunca duas decisões juntas
@@ -52,8 +55,10 @@ Entregas:
 
 RESTRIÇÕES
 
-- Nada de Evolution API. O canal de produção é a Cloud API oficial da Meta, direto,
-  sem intermediário. Telegram é ambiente de desenvolvimento.
+- Nada de Evolution API nem qualquer WhatsApp não oficial.
+- Nenhuma lógica de produto pode viver dentro de um adaptador de canal. Se o
+  WhatsApp nunca for liberado, trocar de canal deve custar zero — é para isso que
+  o ChannelAdapter existe.
 - Nunca inicie conversa com o cliente nesta fase. Mensagem iniciada pelo negócio é
   template pago fora da janela de 24h.
 - Nenhuma decisão de produto nova: se a conversa precisar de algo que não está no

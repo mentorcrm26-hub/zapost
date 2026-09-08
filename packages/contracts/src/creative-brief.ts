@@ -207,6 +207,7 @@ export type BrandKit = z.infer<typeof BrandKit>
 export type Objective = z.infer<typeof Objective>
 export type Network = z.infer<typeof Network>
 export type Offer = z.infer<typeof Offer>
+export type Deadline = z.infer<typeof Deadline>
 export type CreativeRequest = z.infer<typeof CreativeRequest>
 export type AwarenessLevel = z.infer<typeof AwarenessLevel>
 export type Slide = z.infer<typeof Slide>
