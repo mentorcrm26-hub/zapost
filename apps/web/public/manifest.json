@@ -1,0 +1,22 @@
+{
+  "name": "ZaPost — Criativos em 1 Minuto",
+  "short_name": "ZaPost",
+  "description": "Transforme uma foto e um áudio em posts para redes sociais em Português e Inglês.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0F2E2A",
+  "theme_color": "#0F2E2A",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
