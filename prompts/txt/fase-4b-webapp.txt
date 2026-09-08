@@ -1,0 +1,71 @@
+Você está trabalhando no ZaPost. Leia CLAUDE.md — principalmente as regras 1 a 12, que
+são todas de interface — e packages/tokens/tokens.css.
+
+TAREFA — Fase 4b: as onze telas do cliente
+
+O protótipo navegável das telas está em
+https://claude.ai/code/artifact/acdfdcab-f9a2-4fa7-9ef4-4511ec61e4b6
+Abra e siga. Ele mostra cada tela, quando aparece e a decisão de design por trás.
+
+Entregas:
+
+1. apps/web com Next.js 14 App Router + Tailwind usando o preset em
+   packages/tokens/tailwind-preset.js. PWA com manifest e convite para adicionar
+   à tela inicial.
+
+2. As telas, nesta ordem de importância:
+     Meus posts        galeria do que já foi feito + botão gigante CRIAR
+     Criar 1 a 4       o briefing: objetivo, foto, voz, redes
+     Confere           o cartão de confirmação
+     Fazendo           a espera, com progresso que se move
+     Qual você gostou  3 opções tocáveis
+     Prontinho         arquivos por idioma e formato + legenda para copiar
+     Minha marca       logo, cores, @, telefone, idiomas, região
+     Minha conta       plano, raios, cartão, indicação, cancelar
+
+3. Ícones: Twemoji nos botões grandes (SVG, para renderizar igual em todo aparelho),
+   Lucide na moldura da interface. NÃO use ícone de linha nos botões grandes: a
+   48px um traço cinza é abstrato, e 📣 é concreto. E são os mesmos símbolos dos
+   botões do bot — a linguagem visual é uma só.
+
+4. Voz como caminho principal: botão de microfone ocupando o centro da tela, usando
+   Web Speech API no navegador (custo zero). Digitar é o caminho secundário.
+   Mostre SEMPRE o texto entendido antes de seguir.
+
+5. Preview em duas etapas: em uns 3 segundos mostre a versão só-template, e refine
+   por cima. A espera percebida cai de 40 para 3 segundos.
+
+6. Botão "falar com uma pessoa" presente em todas as telas, abrindo o WhatsApp.
+
+7. Interface bilíngue: português como padrão, inglês disponível.
+
+REGRAS DE INTERFACE (do CLAUDE.md, repetidas porque são as que mais se quebram)
+
+- Alvo de toque mínimo 56px. Campo de texto nunca abaixo de 16px, senão o iOS dá zoom.
+- Projete a 360px de largura, não 375: Android barato é o aparelho real do cliente.
+- Nenhuma tela mostra pixel, proporção ou nome técnico de formato. É "Instagram" e
+  "Status do WhatsApp", nunca "1080 × 1350" nem "4:5".
+- Sempre 3 opções de resultado. Escolher é fácil, criticar paralisa.
+- Ícone sempre com rótulo embaixo. Ícone sozinho é adivinhação.
+- Desfazer, nunca confirmar. Em vez de "Tem certeza?", execute e ofereça voltar atrás.
+- Nada que dependa de hover.
+- Zero configuração no caminho de criar: cor, fonte e logo vêm da ficha do negócio.
+
+CRITÉRIO DE ACEITE
+
+- uma pessoa que nunca viu o sistema cria um post do zero sem ajuda, no celular
+- funciona em 360px de largura sem rolagem horizontal em nenhuma tela
+- em 3G lento, a primeira tela útil aparece em menos de 4 segundos
+- nenhum texto cortado, nenhum alvo de toque abaixo de 56px
+- o fluxo inteiro funciona com o teclado, para acessibilidade
+
+NÃO FAÇA
+
+- Não crie editor com camadas ou canvas. Nunca. Se faltar um layout, é template novo.
+- Não crie tela de configurações avançadas.
+- Não crie o painel admin (é a fase 4c).
+- Não implemente cobrança.
+
+AO TERMINAR
+
+Rode em 360px e me mande print das telas de criar, confirmar e escolher.

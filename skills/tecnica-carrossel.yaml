@@ -1,0 +1,17 @@
+id: tecnica-carrossel
+version: 1.0.0
+type: formato
+applies_to:
+  kinds: [carousel]
+content: |
+  Estrutura Sparkline de Carrossel (Nancy Duarte):
+  - Slide 1 (Gancho / O que é): Promessa forte ou pergunta provocadora que interrompe o feed.
+  - Slides Intermediários (Tensão & O que poderia ser): Contraste entre o estado atual cansativo e a solução simples e prática.
+  - Slide Penúltimo (Resolução / Prova): Demonstração clara do resultado final, alívio ou benefício palpável.
+  - Slide Final (Chamada): Próximo passo simples, sem fricção ("Chama no WhatsApp", "Text us today").
+examples:
+  good:
+    - slide1: "3 coisas que você não deveria limpar com água sanitária"
+      slide_final: "Quer sua casa limpa sem risco? Agende seu horário no WhatsApp"
+  bad:
+    - slide1: "Apresentação da nossa empresa de limpeza residencial"

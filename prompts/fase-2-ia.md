@@ -1,0 +1,88 @@
+# Prompt — Fase 2: o pipeline de IA
+
+Só rode depois que a Fase 1 estiver produzindo PNGs que você olharia e postaria.
+
+```
+Você está trabalhando no ZaPost. Leia CLAUDE.md antes de qualquer coisa, e depois
+packages/contracts/src/creative-brief.ts e services/render (que já existe e funciona).
+
+TAREFA — Fase 2: transformar áudio e texto solto em um CreativeBrief válido
+
+Ainda sem banco, sem interface, sem fila. Linha de comando ponta a ponta:
+um áudio e um briefing entram, PNGs saem.
+
+Entregas:
+
+1. packages/ai — a camada de IA, atrás de uma interface de provedor, para trocar de
+   modelo sem mexer no resto do sistema:
+     interface TranscriptionProvider { transcribe(audio): Promise<string> }
+     interface ContentProvider      { generate(input): Promise<unknown> }
+   Implementações: Whisper para transcrição, Claude para conteúdo.
+
+2. skills/ — as skills em YAML, versionadas, com este formato:
+     id, version, type (segmento|tecnica|formato|sazonal|aperfeicoamento),
+     applies_to (segmentos, objetivos e formatos onde vale),
+     content (o texto que vai para o prompt),
+     examples (bons e ruins)
+
+3. Duas skills técnicas para começar, extraídas da biblioteca de squads em
+   D:\Backup PC HP\Projetos\squads:
+     - skills/tecnica-copywriting.yaml
+       Leia squads/copy-squad/agents/eugene-schwartz.md e extraia SOMENTE o bloco
+       core_frameworks (os 5 níveis de consciência e a estratégia de headline por
+       nível). Descarte a persona, a biografia e os comandos: o cliente não quer
+       saber que Eugene Schwartz escreveu o post dele. Máximo 40 linhas.
+     - skills/tecnica-carrossel.yaml
+       Mesma coisa com squads/storytelling/agents/nancy-duarte.md — a estrutura de
+       sparkline vira o esqueleto do carrossel: gancho, tensão, resolução, chamada.
+
+4. O compositor de skills: dado um BusinessProfile e um CreativeRequest, seleciona e
+   concatena as skills aplicáveis, na ordem base -> tecnica -> formato -> segmento.
+   Registre em CreativeBrief.skillsUsed quais entraram.
+
+5. A geração:
+     - AWARENESS_BY_OBJECTIVE (já está no contrato) define a estratégia de headline
+     - a saída do LLM passa por CreativeBrief.safeParse
+     - se falhar, refaz UMA vez mandando os erros do Zod de volta; falhou de novo, erra
+     - nunca aceite JSON não validado adiante
+
+6. A adaptação para inglês é ADAPTAÇÃO, não tradução. "Chama no zap" vira "Text us
+   today", não "call on the zap". Preço, data e CTA mudam de forma. Isso mora na skill.
+
+7. Registro de custo: toda chamada grava provedor, modelo, tokens e custo em USD.
+   Ainda não há banco — grave em .ai-usage.jsonl na raiz, uma linha por chamada.
+
+8. CLI ponta a ponta:
+     pnpm generate samples/request-limpeza.json --out ./out
+   Lê o pedido, transcreve se houver áudio, compõe as skills, chama o LLM, valida,
+   e chama o render da Fase 1. Crie também samples/request-limpeza.json com um áudio
+   de exemplo ou o rawInput já em texto.
+
+RESTRIÇÕES
+
+- IA de imagem continua DESLIGADA. Só liga se enhancePhoto for true, e nesta fase
+  nem implemente: deixe um TODO explícito.
+- Nenhum texto é desenhado por modelo de imagem (regra 13).
+- Não invente campo fora do contrato. Precisa de um? Proponha e explique antes.
+- O prompt de sistema fica em arquivo versionado, nunca embutido no código.
+
+CRITÉRIO DE ACEITE
+
+- pnpm generate roda do pedido ao PNG sem intervenção
+- o CreativeBrief validou de primeira em pelo menos 8 de 10 execuções
+- as headlines em PT e EN são diferentes em estrutura, não uma tradução da outra
+- o custo por criativo aparece no .ai-usage.jsonl e está abaixo de US$ 0,03
+- rodando o mesmo pedido com objective "promocao" e com "divulgar", as headlines
+  saem visivelmente diferentes — é a prova de que o mapa de consciência está agindo
+
+NÃO FAÇA
+
+- Não crie API, banco, frontend, fila nem autenticação.
+- Não implemente tratamento de imagem por IA.
+- Não escreva o prompt de sistema dentro do .ts.
+
+AO TERMINAR
+
+Rode 10 vezes com pedidos diferentes, me diga a taxa de validação de primeira, o custo
+médio por criativo, e cole duas headlines em PT e as duas em EN correspondentes.
+```

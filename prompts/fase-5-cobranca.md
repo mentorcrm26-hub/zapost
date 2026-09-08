@@ -1,0 +1,92 @@
+# Prompt — Fase 5: créditos, Stripe e medição
+
+Só rode quando o produto já funcionar de ponta a ponta sem cobrar.
+
+Juntar cobrança e medição na mesma fase não é economia: **é o mesmo webhook do Stripe
+que confirma o pagamento e dispara a conversão do Google Ads.** Fazer separado é
+escrever o mesmo código duas vezes.
+
+```
+Você está trabalhando no ZaPost. Leia CLAUDE.md e a seção de medição do documento:
+https://claude.ai/code/artifact/3e3e1b99-d427-40c0-ab59-75145d66dea3
+
+TAREFA — Fase 5: transformar uso em receita, e clique em venda rastreada
+
+Entregas:
+
+1. Créditos, os "raios ⚡":
+     - credit_ledger append-only: o saldo é a soma, nunca um campo editado
+     - o crédito debita NA APROVAÇÃO, nunca na geração (regra 4)
+     - o botão "✨ melhorar foto" consome crédito extra
+     - saldo visível na barra do app: "⚡ 137"
+     - pacote avulso para quem estourou a cota no meio do mês
+
+2. Planos no Stripe, em USD:
+     Starter  $19/mês    60 criativos, um idioma, marca d'água
+     Pro      $49/mês   250 criativos, PT e EN, carrossel, sem marca d'água
+     Agency  $129/mês  1.000 criativos, até 5 marcas, vários usuários
+     Anual: dois meses grátis em qualquer plano
+   A trava do Pro é o bilíngue. É comercial, não técnica: a segunda língua custa
+   menos de meio centavo.
+
+3. Teste grátis por QUANTIDADE, não por prazo: 5 criativos sem cartão. Nunca período
+   de 7 dias — esse público não entende cobrança que começa sozinha, e disputa de
+   cartão nos EUA custa caro em dinheiro e em reputação.
+
+4. Checkout, portal do cliente e webhooks do Stripe. Bloqueio por inadimplência com
+   aviso antes, nunca corte seco. Cancelamento visível e fácil, sem labirinto — é
+   exigência legal em vários estados americanos.
+
+5. Medição, instalada do jeito certo:
+     - @next/third-parties/google para GTM e GA4, sem destruir o Core Web Vitals
+       (que afeta o Quality Score e portanto o seu custo por clique)
+     - Consent Mode v2 configurado desde o início
+     - captura do gclid na primeira visita, persistido em cookie, salvo no registro
+       do usuário no cadastro, e devolvido junto com a conversão quando ele pagar
+       dias depois. Sem isso o Google nunca liga o clique à venda — e você TEM teste
+       grátis no meio do caminho.
+     - Enhanced Conversions: e-mail com hash no purchase
+
+6. A conversão sai do SERVIDOR, não do navegador. No mesmo webhook do Stripe que
+   confirma o pagamento, dispare o Measurement Protocol do GA4 e a Conversion API do
+   Google Ads. Medição no navegador se perde com bloqueador de anúncio e com
+   redirecionamento de checkout.
+
+7. Eventos:
+     sign_up                  conta criada
+     first_creative_created   primeiro criativo aprovado — A ATIVAÇÃO REAL
+     creative_approved        cada aprovação
+     begin_checkout           abriu o checkout
+     purchase                 webhook confirmou, com valor e moeda USD
+     whatsapp_link_click      clicou para abrir o bot
+
+8. Programa de indicação: um mês grátis para quem indica, desconto para quem entra.
+   O link mora na tela Minha conta, que é a que o cliente abre satisfeito.
+
+RESTRIÇÕES
+
+- Valores em centavos de USD, inteiro, sempre.
+- Nunca permita UPDATE em credit_ledger.
+- Nenhum dado pessoal em parâmetro de URL.
+- Não dispare purchase pelo navegador.
+
+CRITÉRIO DE ACEITE
+
+- assinar, usar créditos, cancelar e reassinar, tudo sem intervenção manual
+- o saldo bate com a soma do ledger depois de 20 lançamentos misturados
+- um clique de anúncio simulado com gclid chega até o purchase no Google Ads,
+  com a venda acontecendo 3 dias depois do clique
+- estourar a cota e comprar pacote avulso funciona
+- o Lighthouse não piora depois de instalar o GTM
+
+NÃO FAÇA
+
+- Não implemente sugestão proativa no WhatsApp (mensagem iniciada pelo negócio é
+  template pago, e é da v2).
+- Não crie período de teste por prazo.
+- Não esconda o cancelamento.
+
+AO TERMINAR
+
+Me mostre uma assinatura completa em ambiente de teste e a conversão chegando no GA4.
+```

@@ -1,0 +1,67 @@
+{
+  "_comment": "Entrada de exemplo da Fase 1. O motor de render consome isto e cospe PNGs, sem IA nenhuma no caminho. Se os arquivos não saírem vendáveis a partir daqui, nada mais importa.",
+
+  "businessProfile": {
+    "segment": "limpeza",
+    "city": "Framingham",
+    "state": "MA",
+    "timezone": "America/New_York",
+    "audience": "ambos",
+    "languages": ["pt", "en"],
+    "contactChannel": "whatsapp",
+    "contactValue": "+1 (508) 555-0142"
+  },
+
+  "brandKit": {
+    "logoUrl": null,
+    "colors": ["#2F6F5E", "#FFB300", "#0F2E2A"],
+    "fontFamily": null,
+    "handle": "@bellaclean.ma",
+    "phone": "+1 (508) 555-0142",
+    "signature": "Bella Clean"
+  },
+
+  "creativeRequest": {
+    "objective": "divulgar",
+    "offer": {
+      "priceCents": 12000,
+      "priceMode": "exato",
+      "discountPercent": null
+    },
+    "deadline": "esta_semana",
+    "rawInput": "Faz um post da minha empresa de limpeza, tô com vaga pra segunda e quarta, cento e vinte a casa",
+    "photoIds": ["sample-sala-limpa"],
+    "networks": ["instagram", "whatsapp_status"],
+    "languages": ["pt", "en"],
+    "kind": "post",
+    "slideCount": null,
+    "enhancePhoto": false
+  },
+
+  "creativeBrief": {
+    "requestId": "3f8a1c22-7b90-4d1e-9a55-1f0c2e7d4b31",
+    "awarenessLevel": "problem_aware",
+    "templateHints": ["bold-price", "photo-overlay", "clean-split"],
+    "skillsUsed": ["base", "copywriting.awareness", "segmento.limpeza"],
+    "content": {
+      "pt": {
+        "headline": "Segunda e quarta livres",
+        "subheadline": "Sua casa impecável, sem você levantar um dedo",
+        "priceLabel": "$120 a casa",
+        "cta": "Chama no WhatsApp",
+        "caption": "Segunda e quarta livres essa semana! 🧹 Deixo sua casa impecável por $120. Atendo Framingham e região. Chama no WhatsApp pra garantir o seu horário.",
+        "hashtags": ["#limpeza", "#framingham", "#brasileirosnoseua", "#housecleaning"],
+        "slides": null
+      },
+      "en": {
+        "headline": "Monday and Wednesday open",
+        "subheadline": "Come home to a spotless house",
+        "priceLabel": "$120 per home",
+        "cta": "Text us today",
+        "caption": "Two spots left this week 🧹 Spotless home for $120. Serving Framingham and nearby. Text us today to grab your slot.",
+        "hashtags": ["#housecleaning", "#framinghamma", "#cleaningservice"],
+        "slides": null
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "@zapost/tokens",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Paleta, tipografia e espaçamento. tokens.css para o render, o preset para o Tailwind.",
+  "exports": {
+    "./tokens.css": "./tokens.css",
+    "./tailwind-preset": "./tailwind-preset.js"
+  },
+  "files": ["tokens.css", "tailwind-preset.js"],
+  "scripts": {
+    "build": "echo 'tokens são estáticos, nada a compilar'",
+    "typecheck": "echo 'sem TypeScript aqui'"
+  }
+}

@@ -1,0 +1,23 @@
+id: adaptacao-ingles
+version: 1.0.0
+type: tecnica
+applies_to:
+  languages: [en]
+content: |
+  Regras de Adaptação Cultural para Inglês (American English):
+  - O conteúdo em inglês NUNCA é uma tradução literal do português. É uma adaptação cultural para clientes americanos.
+  - CTAs: "Chama no zap" vira "Text us today" ou "Message us for a quote", NUNCA "call on the zap" ou "contact us on WhatsApp" (americanos usam SMS / iMessage / Direct).
+  - Preço: "a casa" vira "per home" ou "flat rate"; "a partir de" vira "starting at $...".
+  - Tom: Direto, focado em conveniência, confiabilidade, economia de tempo e profissionalismo.
+  - Headline em EN tem estrutura própria (frequentemente mais curta e com verbos de ação rápidos).
+examples:
+  good:
+    - pt: "Chama no zap pra garantir seu horário"
+      en: "Text us today to grab your spot"
+    - pt: "$120 a casa"
+      en: "$120 per home"
+  bad:
+    - pt: "Chama no WhatsApp"
+      en: "Call on WhatsApp"
+    - pt: "Deixo sua casa limpa"
+      en: "I leave your house clean"

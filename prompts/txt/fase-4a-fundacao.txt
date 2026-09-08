@@ -1,0 +1,72 @@
+Você está trabalhando no ZaPost. Leia CLAUDE.md e packages/contracts.
+
+TAREFA — Fase 4a: a API, o banco e o login
+
+É quando o sistema deixa de ser demonstração para uma pessoa e vira produto para várias.
+Ainda sem interface: só API, banco e autenticação, testáveis por requisição.
+
+Entregas:
+
+1. apps/api com NestJS + TypeORM + PostgreSQL. Módulos: tenants, users, business-profiles,
+   brand-kits, briefs, creatives, renders, templates, skills, credits, ai-usage.
+
+2. database/migrations/001_initial.sql com as tabelas:
+     tenants            plano, status, créditos do ciclo, telefone, fuso horário
+     users              papel (dono|operador), telefone, provedor de login
+     business_profiles  segmento, cidade, estado, público, idiomas, canal de contato
+     brand_kits         logo, cores, fonte, @, assinatura
+     briefs             objetivo, oferta, preço, prazo, redes, idiomas, respostas
+     creatives          estado, canal de origem, brief, skill usada, custo apurado
+     renders            criativo, template, formato, idioma, url, aprovado
+     templates          versão, formatos, regras de texto, segmentos
+     skills             versão, tipo, prompt, exemplos, ativa
+     credit_ledger      tenant, criativo, delta, motivo, saldo resultante
+     api_keys           provedor, prioridade, teto mensal, gasto acumulado
+     ai_usage           provedor, modelo, tokens, custo USD, criativo
+     wa_sessions        telefone, passo, contexto, expira em
+
+3. Multi-tenant por tenant_id em TODAS as tabelas de dados, desde a primeira migration.
+   Adicionar isolamento depois custa dez vezes mais. Toda consulta filtra por tenant.
+
+4. credit_ledger APPEND-ONLY. O saldo é a soma das linhas, nunca um campo editado.
+   Crie uma função de saldo e proíba UPDATE na tabela.
+
+5. Autenticação:
+     - Entrar com Google como caminho PRINCIPAL
+     - Telefone com código por SMS como alternativa
+     - E-mail com senha NÃO é o caminho principal. Se implementar, deixe escondido.
+   Motivo: boa parte do público tem um e-mail que nunca abre e não lembra a senha.
+
+6. BullMQ + Redis com as filas: transcricao, geracao, render, entrega.
+   Retry com backoff e dead-letter em todas.
+
+7. Migração dos dados de fase anterior: o que estava em .ai-usage.jsonl passa a ir
+   para a tabela ai_usage; a sessão do bot sai do Redis solto e vai para wa_sessions.
+
+8. Seeds: um tenant de exemplo, um brand kit, três templates e as skills já criadas
+   na Fase 2, para o ambiente de desenvolvimento subir populado.
+
+RESTRIÇÕES
+
+- Preços e valores em CENTAVOS de USD, inteiro. Nunca float.
+- Datas relativas resolvem no fuso do tenant, nunca no do servidor.
+- Nenhuma tabela sem tenant_id, exceto templates, skills e api_keys, que são globais.
+- Não use e-mail+senha como fluxo principal.
+
+CRITÉRIO DE ACEITE
+
+- as migrations sobem do zero num banco vazio e descem sem erro
+- criar dois tenants e confirmar que um NÃO enxerga dado do outro em nenhuma rota
+- o saldo de créditos bate com a soma do ledger depois de 10 lançamentos
+- login com Google funciona ponta a ponta
+- o bot da Fase 3 continua funcionando, agora gravando no banco
+
+NÃO FAÇA
+
+- Não crie frontend nem painel admin ainda.
+- Não implemente Stripe nem cobrança.
+- Não mexa no motor de render nem no pipeline de IA.
+
+AO TERMINAR
+
+Me mostre o diagrama das tabelas e a prova do isolamento entre dois tenants.

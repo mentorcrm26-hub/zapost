@@ -1,0 +1,118 @@
+/* ============================================================
+   ZaPost — design tokens
+   ------------------------------------------------------------
+   O app é uma moldura para conteúdo colorido: os criativos usam
+   as cores da marca DO CLIENTE. Por isso o fundo é calmo e existe
+   um acento forte só — senão a interface briga com o preview.
+   ============================================================ */
+
+:root {
+  /* ---- Marca ---------------------------------------------- */
+  --zp-petrol:        #0F2E2A;  /* estrutura, texto, barras */
+  --zp-amber:         #FFB300;  /* o raio: CTA e créditos */
+  --zp-amber-deep:    #B87E00;  /* âmbar legível sobre fundo claro */
+  --zp-amber-wash:    #FFF3D4;  /* fundo de destaque suave */
+
+  /* ---- Neutros (viés esverdeado, nunca cinza puro) --------- */
+  --zp-n50:  #F4F6F4;
+  --zp-n100: #E7ECE9;
+  --zp-n200: #CFD9D5;
+  --zp-n300: #AFC0BA;
+  --zp-n400: #859A93;
+  --zp-n500: #5F776F;
+  --zp-n600: #45605A;
+  --zp-n700: #2A4F49;
+  --zp-n800: #1A3D38;
+  --zp-n900: #0F2E2A;
+  --zp-n950: #08201D;
+
+  /* ---- Semânticas (separadas do acento de marca) ----------- */
+  --zp-success:       #12B76A;
+  --zp-success-wash:  #E3F9EE;
+  --zp-warning:       #B54708;  /* âmbar ESCURO — não confundir com a marca */
+  --zp-warning-wash:  #FDF0E3;
+  --zp-danger:        #D92D20;
+  --zp-danger-wash:   #FCE9E7;
+
+  /* ---- Papéis de superfície (tema claro) ------------------- */
+  --zp-bg:            var(--zp-n50);
+  --zp-surface:       #FFFFFF;
+  --zp-surface-2:     var(--zp-n100);
+  --zp-text:          var(--zp-n900);
+  --zp-text-soft:     var(--zp-n600);
+  --zp-text-muted:    var(--zp-n500);
+  --zp-line:          var(--zp-n200);
+  --zp-line-strong:   var(--zp-n900);
+  --zp-on-amber:      var(--zp-n900);  /* texto em cima do âmbar */
+  --zp-on-petrol:     var(--zp-n50);   /* texto em cima do petróleo */
+
+  /* ---- Tipografia ----------------------------------------- */
+  --zp-font-display: "Bricolage Grotesque", "Trebuchet MS", sans-serif;
+  --zp-font-body:    "Figtree", "Segoe UI", system-ui, sans-serif;
+  --zp-font-mono:    "IBM Plex Mono", Consolas, monospace;
+
+  /* Escala mobile-first. NUNCA usar --zp-text-sm em input:
+     abaixo de 16px o iOS dá zoom sozinho ao focar. */
+  --zp-text-xs:   12px;
+  --zp-text-sm:   14px;
+  --zp-text-base: 16px;  /* mínimo absoluto para campos de formulário */
+  --zp-text-lg:   18px;
+  --zp-text-xl:   21px;
+  --zp-text-2xl:  25px;
+  --zp-text-3xl:  31px;
+  --zp-text-4xl:  39px;
+
+  /* ---- Espaçamento (base 4) ------------------------------- */
+  --zp-1: 4px;   --zp-2: 8px;   --zp-3: 12px;  --zp-4: 16px;
+  --zp-5: 20px;  --zp-6: 24px;  --zp-8: 32px;  --zp-10: 40px;
+  --zp-12: 48px; --zp-16: 64px;
+
+  /* ---- Toque ---------------------------------------------- */
+  --zp-touch:     56px;  /* alvo mínimo — acima dos 44px da Apple */
+  --zp-touch-big: 88px;  /* botões principais de ação */
+
+  /* ---- Forma ---------------------------------------------- */
+  --zp-radius:      10px;
+  --zp-radius-lg:   16px;
+  --zp-border:      2px;  /* traço grosso: legível em tela ruim */
+  --zp-shadow:      0 1px 2px rgba(15, 46, 42, .08),
+                    0 4px 12px rgba(15, 46, 42, .06);
+  --zp-shadow-hard: 5px 5px 0 rgba(15, 46, 42, .18);
+}
+
+/* ---- Tema escuro ------------------------------------------
+   Muitos clientes usam o celular à noite, no fim do expediente.
+   Só os papéis mudam; a marca continua a mesma.               */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --zp-bg:          var(--zp-n950);
+    --zp-surface:     var(--zp-n900);
+    --zp-surface-2:   var(--zp-n800);
+    --zp-text:        var(--zp-n50);
+    --zp-text-soft:   var(--zp-n200);
+    --zp-text-muted:  var(--zp-n300);
+    --zp-line:        var(--zp-n700);
+    --zp-line-strong: var(--zp-n400);
+    --zp-amber-deep:  var(--zp-amber);
+    --zp-amber-wash:  #33280F;
+    --zp-success-wash: #0C2E20;
+    --zp-warning-wash: #2E1D0C;
+    --zp-danger-wash:  #35110E;
+  }
+}
+
+:root[data-theme="dark"] {
+  --zp-bg:          var(--zp-n950);
+  --zp-surface:     var(--zp-n900);
+  --zp-surface-2:   var(--zp-n800);
+  --zp-text:        var(--zp-n50);
+  --zp-text-soft:   var(--zp-n200);
+  --zp-text-muted:  var(--zp-n300);
+  --zp-line:        var(--zp-n700);
+  --zp-line-strong: var(--zp-n400);
+  --zp-amber-deep:  var(--zp-amber);
+  --zp-amber-wash:  #33280F;
+  --zp-success-wash: #0C2E20;
+  --zp-warning-wash: #2E1D0C;
+  --zp-danger-wash:  #35110E;
+}

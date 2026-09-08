@@ -1,0 +1,18 @@
+id: segmento-limpeza
+version: 1.0.0
+type: segmento
+applies_to:
+  segments: [limpeza]
+content: |
+  Diretrizes para Empresas de Limpeza Residencial e Comercial:
+  - Dores do cliente: Falta de tempo, cansaço após a semana de trabalho, vergonha de receber visitas com a casa desarrumada, acúmulo de tarefas domésticas.
+  - Ganchos fortes: Vagas limitadas na semana ("Segunda e quarta livres"), casa cheirosa e organizada, descanso no fim de semana, produtos profissionais e equipe de confiança.
+  - Formato de preço: "$... a casa" (residencial padrão) ou "$... faxina profunda" / "$... deep clean".
+  - Chamada para ação: Reserva de horário imediata ("Garantir horário", "Agendar faxina").
+examples:
+  good:
+    - pt: "Segunda e quarta livres essa semana! Deixo sua casa impecável por $120. Atendo Framingham e região."
+      en: "Two spots left this week! Spotless home for $120. Serving Framingham and nearby areas."
+  bad:
+    - pt: "Serviços de limpeza em geral com vassoura e pano"
+      en: "General cleaning with broom and mop"

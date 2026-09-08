@@ -1,0 +1,22 @@
+node_modules/
+dist/
+*.tsbuildinfo
+
+.env
+.env.local
+.env.*.local
+
+# Saída do motor de render durante os testes da fase 1
+out/
+*.png.tmp
+
+*.log
+npm-debug.log*
+pnpm-debug.log*
+.last-failed-generation.json
+
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

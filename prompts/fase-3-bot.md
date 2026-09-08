@@ -1,0 +1,84 @@
+# Prompt — Fase 3: a conversa no bot
+
+Só rode depois que a Fase 2 estiver gerando criativo do áudio ao PNG.
+
+```
+Você está trabalhando no ZaPost. Leia CLAUDE.md, o contrato em
+packages/contracts/src/creative-brief.ts, e o que já existe em services/render e
+packages/ai.
+
+TAREFA — Fase 3: a máquina de estados da conversa
+
+Ao fim desta fase o produto FUNCIONA para uma pessoa: ela manda foto e áudio no bot e
+recebe os arquivos. Ainda sem cadastro e sem cobrança.
+
+Entregas:
+
+1. packages/conversation — a máquina de estados, independente de canal:
+     inicio -> briefing (perguntas adaptativas) -> confirmacao -> gerando
+            -> escolha -> entrega
+   Toda a lógica mora aqui. Nenhuma linha de Telegram ou WhatsApp neste pacote.
+
+2. A interface ChannelAdapter, com três implementações previstas:
+     sendText(text)
+     sendButtons(text, botoes[])     // no máximo 3 por mensagem
+     sendImages(urls[], legenda)
+     sendFile(url, nome)
+   Implemente Telegram agora (grátis, funciona em horas, botões inline nativos) e
+   deixe a de WhatsApp Cloud API pronta na estrutura, mesmo que ainda sem credencial.
+
+3. O briefing dentro da conversa, seguindo o desenho do produto:
+     - uma pergunta por mensagem, nunca duas decisões juntas
+     - botão sempre que possível; digitar número é só o plano B
+     - adaptativo: preço e prazo só aparecem se o objetivo pedir
+     - toda pergunta tem uma saída "tanto faz, escolhe por mim"
+
+4. O cartão de confirmação antes de QUALQUER chamada de IA. O cliente lê em linguagem
+   de gente o que vai ser feito e confirma. Um "não" aqui custa zero.
+
+5. Sessão com estado e validade: expira em 30 minutos e recomeça limpa. Sem isso o
+   cliente responde "2" no dia seguinte e recebe algo aleatório. Guarde em Redis.
+
+6. Saída de emergência: qualquer resposta não reconhecida cai em
+   "Não entendi 🙈 Manda 1 pra recomeçar ou 0 pra falar com uma pessoa."
+
+7. Comunicação de espera: "Tô fazendo, me dá 40 segundos ⏳" antes do processamento.
+
+8. Fuso horário do cliente: "hoje" e "esta semana" resolvem no fuso dele
+   (BusinessProfile.timezone), nunca no do servidor.
+
+9. Regra 17: na escolha, mande 3 imagens em UM formato e UM idioma. Só depois da
+   aprovação renderize todos os formatos e idiomas e mande os arquivos.
+
+RESTRIÇÕES
+
+- Nada de Evolution API. O canal de produção é a Cloud API oficial da Meta, direto,
+  sem intermediário. Telegram é ambiente de desenvolvimento.
+- Nunca inicie conversa com o cliente nesta fase. Mensagem iniciada pelo negócio é
+  template pago fora da janela de 24h.
+- Nenhuma decisão de produto nova: se a conversa precisar de algo que não está no
+  contrato nem no CLAUDE.md, pergunte antes de inventar.
+
+CRITÉRIO DE ACEITE
+
+Do celular, no Telegram, uma pessoa que nunca viu o sistema consegue:
+- mandar uma foto e um áudio
+- responder o briefing só tocando em botões
+- ver o cartão de confirmação e entender o que vai acontecer
+- receber 3 opções e escolher uma tocando
+- receber os arquivos finais e a legenda para copiar
+tudo sem digitar uma palavra além do áudio, e sem travar em nenhum ponto.
+
+Teste também os caminhos ruins: responder besteira, sumir por 40 minutos e voltar,
+mandar áudio sem foto, mandar foto sem áudio.
+
+NÃO FAÇA
+
+- Não crie cadastro, cobrança, multi-tenant nem painel.
+- Não implemente sugestão proativa (custa dinheiro e é da v2).
+- Não use Evolution API nem qualquer WhatsApp não oficial.
+
+AO TERMINAR
+
+Me mande o print de uma conversa completa no Telegram, do áudio ao arquivo entregue.
+```

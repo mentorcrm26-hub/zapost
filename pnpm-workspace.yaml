@@ -1,0 +1,9 @@
+packages:
+  # Código compartilhado. `contracts` é o centro de gravidade do sistema.
+  - 'packages/*'
+  # Processos de fundo: render, workers de fila.
+  - 'services/*'
+  # API (NestJS) e web (Next.js). Entram na fase 4.
+  - 'apps/*'
+allowBuilds:
+  esbuild: true

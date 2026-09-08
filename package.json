@@ -1,0 +1,26 @@
+{
+  "name": "zapost",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Manda a foto e fala o que você quer. Sai pronto, em português e em inglês.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@12.3.4",
+  "scripts": {
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "prompts": "node scripts/export-prompts.mjs",
+    "check:sample": "tsc -b packages/contracts && node scripts/check-sample.mjs",
+    "clean": "pnpm -r exec rm -rf dist node_modules && rm -rf node_modules",
+    "render": "pnpm --filter @zapost/render start",
+    "generate": "node scripts/generate.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0"
+  }
+}

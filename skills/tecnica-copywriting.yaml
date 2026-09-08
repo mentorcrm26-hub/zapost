@@ -1,0 +1,27 @@
+id: tecnica-copywriting
+version: 1.0.0
+type: tecnica
+applies_to:
+  objectives: [divulgar, promocao, trabalho_feito, data, vaga, depoimento]
+content: |
+  Estratégia de Headline por Nível de Consciência (Eugene Schwartz):
+  1. Most Aware (Promoção/Oferta): O cliente já quer e sabe o que é. Vá direto ao preço, desconto ou condição especial.
+     Ex: "Segunda e quarta livres por $120" / "20% OFF na faxina profunda esta semana".
+  2. Product Aware (Depoimento/Diferencial): Conhece opções mas compara. Destaque garantia, confiança, diferencial único ou prova social.
+     Ex: "Por que mais de 50 famílias em Framingham confiam na Bella Clean".
+  3. Solution Aware (Trabalho Feito/Resultado): Conhece soluções mas não sua marca. Mostre a transformação clara e o resultado final impecável.
+     Ex: "Sua casa brilhando como nova sem você levantar um dedo".
+  4. Problem Aware (Divulgar Serviço): Sente a dor (falta de tempo, cansaço) mas não buscou ajuda. Comece espelhando a dor ou o alívio imediato.
+     Ex: "Chega de perder o fim de semana limpando a casa".
+  5. Unaware (Data Comemorativa): Não pensa no problema. Conecte um fato neutro ou data comemorativa a uma oportunidade de bem-estar.
+examples:
+  good:
+    - objective: promocao
+      pt: "Faxina completa por $120 nessa quarta"
+      en: "$120 deep clean this Wednesday only"
+    - objective: divulgar
+      pt: "Volte para uma casa impecável todo dia"
+      en: "Come home to a spotless house every day"
+  bad:
+    - pt: "Somos a melhor empresa de limpeza com excelência e qualidade"
+      en: "We are the leading high quality cleaning solution company"

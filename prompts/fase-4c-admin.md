@@ -1,0 +1,77 @@
+# Prompt — Fase 4c: o painel do admin
+
+Só rode depois que o webapp da Fase 4b estiver criando post ponta a ponta.
+
+```
+Você está trabalhando no ZaPost. Leia CLAUDE.md e a seção de skills do documento de
+produto: https://claude.ai/code/artifact/3e3e1b99-d427-40c0-ab59-75145d66dea3
+
+TAREFA — Fase 4c: a sala de controle
+
+Não é "configurações do sistema". É onde você descobre quem está usando, quanto está
+custando e o que está sendo reprovado. Só você entra aqui — a interface pode ser densa
+e técnica, o oposto do webapp do cliente.
+
+Entregas:
+
+1. Clientes: lista com plano, status, consumo de raios no mês, ficha do negócio e
+   telefone. Ação de ENTRAR COMO o cliente para dar suporte (com registro de auditoria).
+
+2. Chaves de API: uma entrada por provedor, com prioridade, provedor reserva e TETO DE
+   GASTO MENSAL. Se o principal cair ou estourar o teto, o sistema desce automaticamente
+   para o reserva sem derrubar ninguém. Mostre o gasto acumulado do mês em cada uma.
+
+3. Custo por cliente: tabela com quanto cada tenant custou no mês em LLM, imagem e
+   transcrição, contra o que ele paga. Ordenável por margem. É a tela que identifica
+   quem está destruindo sua margem.
+
+4. Qualidade: taxa de aprovação NA PRIMEIRA TENTATIVA, quebrada por skill, por template
+   e por idioma. Template com aprovação baixa é template para aposentar.
+
+5. Editor de skills: criar, editar, versionar, publicar e reverter as cinco famílias
+   (segmento, técnica, formato, sazonal, aperfeiçoamento). Pré-visualização com conteúdo
+   real em PT e EN antes de publicar. Teste A/B entre duas versões da mesma skill,
+   comparando aprovação de primeira.
+
+6. Aprendizados pendentes — a fila do que o sistema detectou sozinho:
+     "o template 3 aprova 40% no segmento limpeza"
+     "clientes de beleza sempre trocam a palavra X"
+   Cada item tem os números do lado e dois botões: promover a regra, ou descartar.
+   ESTE PASSO É INEGOCIÁVEL (regra 16): skill auto-gerada nunca entra em produção
+   sozinha. Sem revisão humana o sistema aprende a agradar e todo post fica igual.
+
+7. Skill auto-gerada, o ciclo completo:
+     detecta lacuna  -> combinação sem skill, ou aprovação de primeira abaixo de 50%
+                        em pelo menos 20 criativos
+     rascunha        -> a partir das skills base, dos criativos aprovados naquela
+                        combinação e das palavras que os clientes trocaram
+     testa às cegas  -> entra como uma das 3 opções, sem aviso ao cliente
+     você promove    -> só então vira permanente
+     versiona        -> changelog e reversão em um clique
+
+8. Fila e falhas: jobs em processamento, erros por etapa, botão de reprocessar.
+
+RESTRIÇÕES
+
+- O admin é uma aplicação separada ou uma rota protegida com papel próprio. Nunca
+  misture rota de admin com rota de cliente no mesmo guard.
+- Toda ação de "entrar como cliente" fica registrada com quem, quando e por quê.
+- Nenhuma skill vai para produção sem clique humano.
+
+CRITÉRIO DE ACEITE
+
+- criar uma skill, publicar, ver o efeito num criativo, e reverter para a versão anterior
+- estourar o teto de uma chave de API em ambiente de teste e ver o sistema cair para
+  a reserva sem erro visível para o cliente
+- a tela de custo bate com a soma de ai_usage do período
+- a taxa de aprovação de primeira é calculada corretamente contra dados reais
+
+NÃO FAÇA
+
+- Não aplique as regras de interface do cliente aqui. Densidade é bem-vinda no admin.
+- Não deixe nenhum caminho em que uma skill vire permanente sem aprovação.
+
+AO TERMINAR
+
+Me mostre a tela de custo por cliente e a de aprendizados pendentes.
+```

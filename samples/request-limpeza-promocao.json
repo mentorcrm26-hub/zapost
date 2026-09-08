@@ -1,0 +1,40 @@
+{
+  "_comment": "Entrada de teste com objetivo 'promocao' (most_aware). O LLM deve gerar headline focada no preço e na oferta.",
+
+  "businessProfile": {
+    "segment": "limpeza",
+    "city": "Framingham",
+    "state": "MA",
+    "timezone": "America/New_York",
+    "audience": "ambos",
+    "languages": ["pt", "en"],
+    "contactChannel": "whatsapp",
+    "contactValue": "+1 (508) 555-0142"
+  },
+
+  "brandKit": {
+    "logoUrl": null,
+    "colors": ["#2F6F5E", "#FFB300", "#0F2E2A"],
+    "fontFamily": null,
+    "handle": "@bellaclean.ma",
+    "phone": "+1 (508) 555-0142",
+    "signature": "Bella Clean"
+  },
+
+  "creativeRequest": {
+    "objective": "promocao",
+    "offer": {
+      "priceCents": 12000,
+      "priceMode": "exato",
+      "discountPercent": 20
+    },
+    "deadline": "esta_semana",
+    "rawInput": "Promoção relâmpago de faxina profunda essa semana, 120 dólares a casa",
+    "photoIds": ["sample-sala-limpa"],
+    "networks": ["instagram", "whatsapp_status"],
+    "languages": ["pt", "en"],
+    "kind": "post",
+    "slideCount": null,
+    "enhancePhoto": false
+  }
+}

@@ -1,0 +1,23 @@
+id: base
+version: 1.0.0
+type: tecnica
+applies_to:
+  all: true
+content: |
+  Diretrizes Centrais do ZaPost:
+  - Público-alvo: Brasileiros donos de micro/pequenos negócios nos Estados Unidos (ex: limpeza, salão, construção, food truck).
+  - Linguagem: Direta, amigável, confiável e comercial. Sem jargões corporativos ("sinergia", "soluções inovadoras").
+  - Headline: Curta, com alto impacto visual (máximo 64 caracteres). Tem que ser legível mesmo em miniatura de 200px.
+  - Subheadline: Apoio claro que reforça a proposta de valor (máximo 90 caracteres).
+  - PriceLabel: Formato natural e claro (ex: "$120 a casa", "A partir de $80", "$120 per home").
+  - CTA: Claro e convidativo (máximo 40 caracteres, ex: "Chama no WhatsApp", "Text us today").
+  - Caption: Texto para postagem nas redes sociais, com contexto local (cidade/estado) e emojis bem distribuídos.
+examples:
+  good:
+    - headline: "Segunda e quarta livres"
+      subheadline: "Sua casa impecável sem você levantar um dedo"
+      cta: "Chama no WhatsApp"
+  bad:
+    - headline: "Provisão de serviços profissionais integrados de higienização"
+      subheadline: "Atuamos com maestria no mercado regional"
+      cta: "Clique aqui para saber mais"

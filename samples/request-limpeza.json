@@ -1,0 +1,40 @@
+{
+  "_comment": "Entrada de teste da Fase 2: ficha do negócio + pedido do cliente (texto ou áudio). O pipeline de IA transforma isto em um CreativeBrief e chama o render.",
+
+  "businessProfile": {
+    "segment": "limpeza",
+    "city": "Framingham",
+    "state": "MA",
+    "timezone": "America/New_York",
+    "audience": "ambos",
+    "languages": ["pt", "en"],
+    "contactChannel": "whatsapp",
+    "contactValue": "+1 (508) 555-0142"
+  },
+
+  "brandKit": {
+    "logoUrl": null,
+    "colors": ["#2F6F5E", "#FFB300", "#0F2E2A"],
+    "fontFamily": null,
+    "handle": "@bellaclean.ma",
+    "phone": "+1 (508) 555-0142",
+    "signature": "Bella Clean"
+  },
+
+  "creativeRequest": {
+    "objective": "divulgar",
+    "offer": {
+      "priceCents": 12000,
+      "priceMode": "exato",
+      "discountPercent": null
+    },
+    "deadline": "esta_semana",
+    "rawInput": "Faz um post da minha empresa de limpeza, tô com vaga pra segunda e quarta, cento e vinte a casa",
+    "photoIds": ["sample-sala-limpa"],
+    "networks": ["instagram", "whatsapp_status"],
+    "languages": ["pt", "en"],
+    "kind": "post",
+    "slideCount": null,
+    "enhancePhoto": false
+  }
+}
