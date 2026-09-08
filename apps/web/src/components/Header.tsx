@@ -31,7 +31,7 @@ export function Header() {
           title="Seus créditos disponíveis"
         >
           <Zap className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-          <span>{state.credits} créditos</span>
+          <span className="font-mono text-xs">⚡ {state.credits}</span>
         </Link>
 
         {/* Idioma Toggle */}

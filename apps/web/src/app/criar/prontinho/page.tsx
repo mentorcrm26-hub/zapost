@@ -7,7 +7,7 @@ import confetti from 'canvas-confetti'
 import { useCreatePost } from '@/context/CreatePostContext'
 
 export default function ProntinhoPage() {
-  const { state } = useCreatePost()
+  const { state, updateState } = useCreatePost()
   const [copiedLang, setCopiedLang] = useState<string | null>(null)
 
   const selectedOpt =
@@ -164,6 +164,33 @@ export default function ProntinhoPage() {
           </p>
           <p className="text-[11px] text-sky-400">{selectedOpt.tagsEn}</p>
         </div>
+      </div>
+
+      {/* Seção 2.5: Melhorar Foto com IA (Crédito Extra) */}
+      <div className="bg-gradient-to-r from-purple-950/40 via-zinc-900 to-zinc-900 border border-purple-500/30 rounded-2xl p-4 flex items-center justify-between shadow-md">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center shrink-0">
+            <Sparkles className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="font-bold text-sm text-zinc-100">✨ Iluminação & Nitidez com IA</p>
+            <p className="text-xs text-zinc-400">Trata reflexos, sombras e saturação (+1 raio)</p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => {
+            if (state.credits < 1) {
+              alert('Saldo insuficiente de raios para melhoria de foto.')
+              return
+            }
+            updateState({ credits: state.credits - 1 })
+            alert('✨ Foto aprimorada com sucesso! +1 raio debitado.')
+          }}
+          className="bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl touch-target min-h-[44px] shrink-0 shadow-sm"
+        >
+          Melhorar (⚡ 1)
+        </button>
       </div>
 
       {/* Botão Final: Voltar aos Meus Posts */}

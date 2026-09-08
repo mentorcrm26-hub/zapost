@@ -14,6 +14,7 @@ import { CreditsModule } from './modules/credits/credits.module.js'
 import { AIUsageModule } from './modules/ai-usage/ai-usage.module.js'
 import { SessionsModule } from './modules/sessions/sessions.module.js'
 import { QueueModule } from './queues/queue.module.js'
+import { BillingModule } from './modules/billing/billing.module.js'
 import { TenantContextService } from './common/context/tenant-context.service.js'
 import { TenantInterceptor } from './common/interceptors/tenant.interceptor.js'
 
@@ -33,6 +34,7 @@ import { TenantInterceptor } from './common/interceptors/tenant.interceptor.js'
     AIUsageModule,
     SessionsModule,
     QueueModule,
+    BillingModule,
   ],
   providers: [
     TenantContextService,

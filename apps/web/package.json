@@ -10,6 +10,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@next/third-parties": "14.2.24",
     "@zapost/contracts": "workspace:*",
     "@zapost/tokens": "workspace:*",
     "canvas-confetti": "^1.9.4",
