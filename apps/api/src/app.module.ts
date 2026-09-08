@@ -15,6 +15,7 @@ import { AIUsageModule } from './modules/ai-usage/ai-usage.module.js'
 import { SessionsModule } from './modules/sessions/sessions.module.js'
 import { QueueModule } from './queues/queue.module.js'
 import { BillingModule } from './modules/billing/billing.module.js'
+import { ModerationModule } from './modules/moderation/moderation.module.js'
 import { TenantContextService } from './common/context/tenant-context.service.js'
 import { TenantInterceptor } from './common/interceptors/tenant.interceptor.js'
 
@@ -35,6 +36,7 @@ import { TenantInterceptor } from './common/interceptors/tenant.interceptor.js'
     SessionsModule,
     QueueModule,
     BillingModule,
+    ModerationModule,
   ],
   providers: [
     TenantContextService,
