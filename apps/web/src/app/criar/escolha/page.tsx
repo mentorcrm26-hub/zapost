@@ -38,6 +38,9 @@ export default function EscolhaPage() {
       <div className="flex flex-col gap-4">
         {state.generatedOptions.map((opt) => {
           const isSelected = selectedId === opt.id
+          const previewImg = state.language === 'en' ? (opt.previewUrlEn || opt.previewUrl) : opt.previewUrl
+          const headlineText = state.language === 'en' ? opt.headlineEn : opt.headlinePt
+          const captionText = state.language === 'en' ? opt.captionEn : opt.captionPt
 
           return (
             <div
@@ -65,9 +68,9 @@ export default function EscolhaPage() {
               </div>
 
               {/* Imagem de Prévia com Watermark */}
-              <div className="relative rounded-2xl overflow-hidden bg-black aspect-[4/5] max-h-[380px] flex items-center justify-center">
+              <div className="relative rounded-2xl overflow-hidden bg-black aspect-square max-h-[380px] flex items-center justify-center">
                 <img
-                  src={opt.previewUrl}
+                  src={previewImg}
                   alt={opt.name}
                   className="w-full h-full object-contain"
                 />
@@ -77,7 +80,7 @@ export default function EscolhaPage() {
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation()
-                    setModalImage(opt.previewUrl)
+                    setModalImage(previewImg)
                   }}
                   className="absolute bottom-2.5 right-2.5 bg-black/60 backdrop-blur-md text-white p-2 rounded-xl border border-white/20 touch-target min-h-[36px] min-w-[36px]"
                   title="Ver imagem ampliada"
@@ -88,8 +91,8 @@ export default function EscolhaPage() {
 
               {/* Headline Resumida */}
               <div className="mt-2.5 px-1">
-                <p className="text-xs font-bold text-zinc-200 truncate">{opt.headlinePt}</p>
-                <p className="text-[11px] text-zinc-400 truncate mt-0.5">{opt.captionPt}</p>
+                <p className="text-xs font-bold text-zinc-200 truncate">{headlineText}</p>
+                <p className="text-[11px] text-zinc-400 truncate mt-0.5">{captionText}</p>
               </div>
             </div>
           )

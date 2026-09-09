@@ -3,39 +3,161 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Sparkles, CheckCircle2, Loader2 } from 'lucide-react'
+import { useCreatePost } from '@/context/CreatePostContext'
+import { renderCreativeCanvas, generateDynamicCopy } from '@/lib/render-creative'
 
 export default function FazendoPage() {
   const router = useRouter()
+  const { state, updateState } = useCreatePost()
   const [step, setStep] = useState(1)
-  const [progress, setProgress] = useState(10)
-  const [showFastPreview, setShowFastPreview] = useState(false)
+  const [progress, setProgress] = useState(20)
+  const isGeneratingRef = React.useRef(false)
 
   useEffect(() => {
-    // 1. Em 2.5s mostra preview instantâneo do layout base (reduz espera percebida)
-    const timerFastPreview = setTimeout(() => {
-      setShowFastPreview(true)
-      setStep(2)
-      setProgress(45)
-    }, 2500)
+    if (isGeneratingRef.current) return
+    isGeneratingRef.current = true
 
-    // 2. Em 5s avança para etapa 3
-    const timerStep3 = setTimeout(() => {
-      setStep(3)
-      setProgress(85)
-    }, 5000)
+    async function generateRealCreatives() {
+      try {
+        const photoUrl = state.photoUrl || '/sample-sala.jpg'
+        const rawInput = state.rawInput || 'Limpeza completa residencial em Framingham por $120'
+        const price = state.price || '120'
+        const objective = state.objective || 'promocao'
 
-    // 3. Em 7s finaliza e vai para a tela de escolha das 3 opções
-    const timerDone = setTimeout(() => {
-      setProgress(100)
-      router.push('/criar/escolha')
-    }, 7000)
+        // 1. Gera as cópias personalizadas com base no texto e preço reais
+        const dynamicCopies = generateDynamicCopy(rawInput, price, objective, state.language)
 
-    return () => {
-      clearTimeout(timerFastPreview)
-      clearTimeout(timerStep3)
-      clearTimeout(timerDone)
+        setStep(1)
+        setProgress(40)
+
+        // 2. Renderiza em tempo real os 3 templates com a foto real do usuário
+        const generated = await Promise.all(
+          dynamicCopies.map(async (copy) => {
+            const templateId = copy.id as 'bold-price' | 'photo-overlay' | 'clean-split'
+
+            // Feed PT
+            const previewUrl = await renderCreativeCanvas({
+              template: templateId,
+              format: 'feed',
+              language: 'pt',
+              photoUrl: photoUrl,
+              headline: copy.headlinePt,
+              price: price,
+              businessName: state.businessName || 'Bella Clean',
+              phone: state.phone || '(508) 555-0142',
+              brandColor: state.brandColor || '#10b981',
+              withWatermark: true,
+            })
+
+            // Feed EN
+            const previewUrlEn = await renderCreativeCanvas({
+              template: templateId,
+              format: 'feed',
+              language: 'en',
+              photoUrl: photoUrl,
+              headline: copy.headlineEn,
+              price: price,
+              businessName: state.businessName || 'Bella Clean',
+              phone: state.phone || '(508) 555-0142',
+              brandColor: state.brandColor || '#10b981',
+              withWatermark: true,
+            })
+
+            // Final High-Res Feed PT (sem marca d'água)
+            const finalUrl = await renderCreativeCanvas({
+              template: templateId,
+              format: 'feed',
+              language: 'pt',
+              photoUrl: photoUrl,
+              headline: copy.headlinePt,
+              price: price,
+              businessName: state.businessName || 'Bella Clean',
+              phone: state.phone || '(508) 555-0142',
+              brandColor: state.brandColor || '#10b981',
+              withWatermark: false,
+            })
+
+            // Final High-Res Feed EN
+            const finalUrlEn = await renderCreativeCanvas({
+              template: templateId,
+              format: 'feed',
+              language: 'en',
+              photoUrl: photoUrl,
+              headline: copy.headlineEn,
+              price: price,
+              businessName: state.businessName || 'Bella Clean',
+              phone: state.phone || '(508) 555-0142',
+              brandColor: state.brandColor || '#10b981',
+              withWatermark: false,
+            })
+
+            // Final High-Res Story PT (9:16)
+            const finalStoryUrl = await renderCreativeCanvas({
+              template: templateId,
+              format: 'story',
+              language: 'pt',
+              photoUrl: photoUrl,
+              headline: copy.headlinePt,
+              price: price,
+              businessName: state.businessName || 'Bella Clean',
+              phone: state.phone || '(508) 555-0142',
+              brandColor: state.brandColor || '#10b981',
+              withWatermark: false,
+            })
+
+            // Final High-Res Story EN (9:16)
+            const finalStoryUrlEn = await renderCreativeCanvas({
+              template: templateId,
+              format: 'story',
+              language: 'en',
+              photoUrl: photoUrl,
+              headline: copy.headlineEn,
+              price: price,
+              businessName: state.businessName || 'Bella Clean',
+              phone: state.phone || '(508) 555-0142',
+              brandColor: state.brandColor || '#10b981',
+              withWatermark: false,
+            })
+
+            return {
+              id: copy.id,
+              name: copy.name,
+              badge: copy.badge,
+              previewUrl: previewUrl || copy.id,
+              previewUrlEn: previewUrlEn || copy.id,
+              finalUrl: finalUrl || previewUrl,
+              finalUrlEn: finalUrlEn || previewUrlEn,
+              finalStoryUrl: finalStoryUrl || previewUrl,
+              finalStoryUrlEn: finalStoryUrlEn || previewUrlEn,
+              headlinePt: copy.headlinePt,
+              headlineEn: copy.headlineEn,
+              captionPt: copy.captionPt,
+              captionEn: copy.captionEn,
+              tagsPt: copy.tagsPt,
+              tagsEn: copy.tagsEn,
+            }
+          })
+        )
+
+        setStep(2)
+        setProgress(75)
+        updateState({ generatedOptions: generated })
+
+        setTimeout(() => {
+          setStep(3)
+          setProgress(100)
+          setTimeout(() => {
+            router.push('/criar/escolha')
+          }, 600)
+        }, 800)
+      } catch (err) {
+        console.error('Erro na geração dinâmica:', err)
+        router.push('/criar/escolha')
+      }
     }
-  }, [router])
+
+    generateRealCreatives()
+  }, [])
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[70vh] gap-6 text-center px-2 py-4">
@@ -95,30 +217,19 @@ export default function FazendoPage() {
 
         <div className="flex items-center gap-3">
           {step >= 3 ? (
-            <Loader2 className="w-5 h-5 text-amber-400 animate-spin shrink-0" />
+            <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
           ) : (
             <div className="w-5 h-5 rounded-full border border-zinc-700 shrink-0" />
           )}
           <span className={`text-xs ${step >= 3 ? 'font-bold text-zinc-100' : 'text-zinc-500'}`}>
-            3. Renderizando artes com Satori em alta definição...
+            3. Renderizando suas 3 artes com a sua foto e dados...
           </span>
         </div>
       </div>
 
-      {/* Preview Instantâneo em 2 Tempos */}
-      {showFastPreview && (
-        <div className="w-full bg-emerald-950/40 border border-emerald-500/40 rounded-2xl p-3 flex items-center gap-3 text-left animate-fadeIn">
-          <img
-            src="/out/bold-price_feed_45_pt_preview.png"
-            alt="Esboço preliminar"
-            className="w-14 h-16 object-cover rounded-lg border border-emerald-500/40"
-          />
-          <div>
-            <p className="text-xs font-bold text-emerald-300">Layout base gerado! ✨</p>
-            <p className="text-[11px] text-zinc-400">Refinando acabamento e tipografia final...</p>
-          </div>
-        </div>
-      )}
+      <div className="text-xs text-zinc-500">
+        ⚡ Aplicando branding, contraste e adaptação bilíngue...
+      </div>
     </div>
   )
 }

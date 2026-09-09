@@ -12,12 +12,19 @@ export interface CreatePostState {
   language: 'pt' | 'en'
   selectedTemplate: string
   credits: number
+  businessName?: string
+  phone?: string
+  brandColor?: string
   generatedOptions: Array<{
     id: string
     name: string
     badge: string
     previewUrl: string
+    previewUrlEn?: string
     finalUrl: string
+    finalUrlEn?: string
+    finalStoryUrl?: string
+    finalStoryUrlEn?: string
     headlinePt: string
     headlineEn: string
     captionPt: string

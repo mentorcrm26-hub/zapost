@@ -1,8 +1,14 @@
+'use client'
+
 import React from 'react'
 import Link from 'next/link'
 import { MapPin, Shield } from 'lucide-react'
+import { useCreatePost } from '@/context/CreatePostContext'
 
 export function LocalSeoLinks() {
+  const { state } = useCreatePost()
+  const isEn = state.language === 'en'
+
   const hubs = [
     { slug: 'boston', name: 'Boston & Framingham', state: 'MA' },
     { slug: 'orlando', name: 'Orlando & Kissimmee', state: 'FL' },
@@ -17,7 +23,7 @@ export function LocalSeoLinks() {
       <div className="space-y-2">
         <span className="text-[11px] font-mono uppercase text-zinc-500 tracking-wider flex items-center justify-center gap-1">
           <MapPin className="w-3.5 h-3.5 text-emerald-400" />
-          Polos da Comunidade Brasileira nos EUA
+          {isEn ? 'US Brazilian Community Regional Hubs' : 'Polos da Comunidade Brasileira nos EUA'}
         </span>
         <div className="flex flex-wrap gap-2 justify-center">
           {hubs.map((h) => (
@@ -47,12 +53,15 @@ export function LocalSeoLinks() {
         </Link>
         <span>•</span>
         <Link href="/admin" className="text-zinc-500 hover:text-emerald-400 font-mono">
-          Operador Admin
+          {isEn ? 'Admin Operator' : 'Operador Admin'}
         </Link>
       </div>
 
       <p className="text-[11px] text-zinc-600 font-mono">
-        © 2026 ZaPost Inc. • Marketing Digital no WhatsApp para Brasileiros nos EUA.
+        © 2026 ZaPost Inc. •{' '}
+        {isEn
+          ? 'WhatsApp Digital Marketing for Small Businesses in the US.'
+          : 'Marketing Digital no WhatsApp para Brasileiros nos EUA.'}
       </p>
     </footer>
   )

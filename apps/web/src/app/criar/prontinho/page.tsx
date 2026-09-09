@@ -54,27 +54,28 @@ export default function ProntinhoPage() {
 
       {/* Seção 1: Arquivos para Download */}
       <div className="flex flex-col gap-3">
-        <h2 className="text-sm font-bold text-zinc-200 flex items-center gap-2">
-          <span>📦 Arquivos de Imagem em Alta Resolução</span>
+        <h2 className="text-sm font-bold text-zinc-200 flex items-center justify-between">
+          <span>📦 Seus Criativos em Alta Definição</span>
+          <span className="text-[11px] font-normal text-emerald-400">Prontos para postar</span>
         </h2>
 
         {/* Card Feed */}
         <div className="bg-zinc-900/90 border border-white/10 rounded-2xl p-4 flex items-center justify-between shadow-md">
           <div className="flex items-center gap-3">
             <img
-              src={`/out/${selectedOpt.id}_feed_45_pt.png`}
+              src={selectedOpt.finalUrl || `/out/${selectedOpt.id}_feed_45_pt.png`}
               alt="Feed"
-              className="w-14 h-16 object-cover rounded-xl border border-white/10 bg-black"
+              className="w-14 h-14 object-cover rounded-xl border border-white/10 bg-black"
             />
             <div>
-              <p className="font-bold text-sm text-zinc-100">Instagram & WhatsApp (Feed)</p>
-              <p className="text-xs text-zinc-400">Português 🇧🇷 e Inglês 🇺🇸</p>
+              <p className="font-bold text-sm text-zinc-100">Post Quadrado (Feed)</p>
+              <p className="text-xs text-zinc-400">1080x1080 • Instagram & WhatsApp</p>
             </div>
           </div>
           <a
-            href={`/out/${selectedOpt.id}_feed_45_pt.png`}
-            download={`${selectedOpt.id}_feed_45_pt.png`}
-            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 touch-target min-h-[44px] shadow-sm"
+            href={selectedOpt.finalUrl || `/out/${selectedOpt.id}_feed_45_pt.png`}
+            download={`criativo-${selectedOpt.id}-feed.png`}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-1.5 touch-target min-h-[44px] shadow-sm active:scale-95 transition-transform"
           >
             <Download className="w-4 h-4" />
             <span>Baixar</span>
@@ -85,24 +86,49 @@ export default function ProntinhoPage() {
         <div className="bg-zinc-900/90 border border-white/10 rounded-2xl p-4 flex items-center justify-between shadow-md">
           <div className="flex items-center gap-3">
             <img
-              src={`/out/${selectedOpt.id}_story_916_pt.png`}
+              src={selectedOpt.finalStoryUrl || selectedOpt.finalUrl || `/out/${selectedOpt.id}_story_916_pt.png`}
               alt="Story"
-              className="w-14 h-16 object-cover rounded-xl border border-white/10 bg-black"
+              className="w-14 h-14 object-cover rounded-xl border border-white/10 bg-black"
             />
             <div>
-              <p className="font-bold text-sm text-zinc-100">Stories & Status</p>
-              <p className="text-xs text-zinc-400">Português 🇧🇷 e Inglês 🇺🇸</p>
+              <p className="font-bold text-sm text-zinc-100">Post Vertical (Stories/Status)</p>
+              <p className="text-xs text-zinc-400">1080x1920 • Stories, Reels & Status</p>
             </div>
           </div>
           <a
-            href={`/out/${selectedOpt.id}_story_916_pt.png`}
-            download={`${selectedOpt.id}_story_916_pt.png`}
-            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 touch-target min-h-[44px] shadow-sm"
+            href={selectedOpt.finalStoryUrl || selectedOpt.finalUrl || `/out/${selectedOpt.id}_story_916_pt.png`}
+            download={`criativo-${selectedOpt.id}-story.png`}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-1.5 touch-target min-h-[44px] shadow-sm active:scale-95 transition-transform"
           >
             <Download className="w-4 h-4" />
             <span>Baixar</span>
           </a>
         </div>
+
+        {/* Card Versão em Inglês */}
+        {selectedOpt.finalUrlEn && (
+          <div className="bg-zinc-900/90 border border-white/10 rounded-2xl p-4 flex items-center justify-between shadow-md">
+            <div className="flex items-center gap-3">
+              <img
+                src={selectedOpt.finalUrlEn}
+                alt="Feed EN"
+                className="w-14 h-14 object-cover rounded-xl border border-white/10 bg-black"
+              />
+              <div>
+                <p className="font-bold text-sm text-zinc-100">🇺🇸 Versão em Inglês (Feed)</p>
+                <p className="text-xs text-zinc-400">1080x1080 • Para clientes americanos</p>
+              </div>
+            </div>
+            <a
+              href={selectedOpt.finalUrlEn}
+              download={`creative-${selectedOpt.id}-en.png`}
+              className="bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-1.5 touch-target min-h-[44px] shadow-sm active:scale-95 transition-transform"
+            >
+              <Download className="w-4 h-4" />
+              <span>Baixar EN</span>
+            </a>
+          </div>
+        )}
       </div>
 
       {/* Seção 2: Legendas Prontas para Copiar */}

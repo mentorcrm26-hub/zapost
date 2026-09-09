@@ -1,74 +1,130 @@
 'use client'
 
 import React from 'react'
-import { X, Check, Clock, Brain, MessageCircle, AlertCircle } from 'lucide-react'
+import { X, Check } from 'lucide-react'
+import { useCreatePost } from '@/context/CreatePostContext'
 
 export function CanvaComparison() {
+  const { state } = useCreatePost()
+  const isEn = state.language === 'en'
+
   return (
-    <section className="bg-zinc-900/90 border border-white/10 rounded-3xl p-5 sm:p-6 space-y-5 shadow-xl">
-      <div className="border-b border-white/10 pb-4">
-        <span className="text-xs font-mono uppercase font-bold text-amber-400 bg-amber-400/10 px-2.5 py-0.5 rounded-full border border-amber-400/20">
-          A Pergunta Que Todo Empreendedor Faz
+    <section className="bg-zinc-900/90 border border-white/10 rounded-3xl p-6 sm:p-8 lg:p-10 space-y-8 shadow-2xl backdrop-blur-xl">
+      <div className="border-b border-white/10 pb-6">
+        <span className="text-xs sm:text-sm font-mono uppercase font-bold text-amber-400 bg-amber-400/10 px-3.5 py-1 rounded-full border border-amber-400/20">
+          {isEn ? 'The Question Every Business Owner Asks' : 'A Pergunta Que Todo Empreendedor Faz'}
         </span>
-        <h2 className="text-lg font-bold text-white mt-2">
-          &quot;Por que não usar o Canva de graça?&quot;
+        <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-white mt-3">
+          {isEn ? '"Why not just use Canva for free?"' : '"Por que não usar o Canva de graça?"'}
         </h2>
-        <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
-          A resposta é simples: o Canva entrega uma <strong>tela em branco</strong>. Depois de 10 horas de trabalho pesado, você não precisa de mais ferramentas — precisa de trabalho pronto.
+        <p className="text-sm sm:text-base text-zinc-300 mt-2 leading-relaxed max-w-2xl">
+          {isEn ? (
+            <>
+              The answer is simple: Canva hands you a <strong>blank canvas</strong>. After 10 hours of hard work, you
+              don&apos;t need another tool — you need <strong>finished work</strong>.
+            </>
+          ) : (
+            <>
+              A resposta é simples: o Canva entrega uma <strong>tela em branco</strong>. Depois de 10 horas de trabalho
+              pesado, você não precisa de mais ferramentas — precisa de <strong>trabalho pronto</strong>.
+            </>
+          )}
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
         {/* Lado Canva */}
-        <div className="bg-zinc-950 border border-rose-500/20 rounded-2xl p-4 space-y-3">
-          <div className="flex items-center gap-2 text-rose-400 font-bold text-sm">
-            <X className="w-4 h-4 stroke-[3]" />
-            <span>Usando o Canva</span>
+        <div className="bg-zinc-950/90 border border-rose-500/30 rounded-3xl p-6 sm:p-7 space-y-4 shadow-lg">
+          <div className="flex items-center gap-2.5 text-rose-400 font-extrabold text-base border-b border-white/5 pb-3">
+            <div className="w-8 h-8 rounded-xl bg-rose-500/10 flex items-center justify-center">
+              <X className="w-5 h-5 stroke-[3] text-rose-400" />
+            </div>
+            <span>{isEn ? 'Using Canva' : 'Usando o Canva'}</span>
           </div>
 
-          <ul className="space-y-2.5 text-xs text-zinc-400">
-            <li className="flex items-start gap-2">
-              <X className="w-3.5 h-3.5 text-rose-500 shrink-0 mt-0.5" />
-              <span>Você precisa ter ideias do zero depois de um dia exaustivo.</span>
+          <ul className="space-y-3.5 text-xs sm:text-sm text-zinc-300">
+            <li className="flex items-start gap-3">
+              <X className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+              <span>
+                {isEn
+                  ? 'You must come up with design ideas from scratch after an exhausting day.'
+                  : 'Você precisa ter ideias do zero depois de um dia exaustivo.'}
+              </span>
             </li>
-            <li className="flex items-start gap-2">
-              <X className="w-3.5 h-3.5 text-rose-500 shrink-0 mt-0.5" />
-              <span>Gasta 40 minutos alinhando fontes, cores e fotos no celular.</span>
+            <li className="flex items-start gap-3">
+              <X className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+              <span>
+                {isEn
+                  ? 'Waste 40 minutes tweaking fonts, colors, and photos on a small phone screen.'
+                  : 'Gasta 40 minutos alinhando fontes, cores e fotos no celular.'}
+              </span>
             </li>
-            <li className="flex items-start gap-2">
-              <X className="w-3.5 h-3.5 text-rose-500 shrink-0 mt-0.5" />
-              <span>Precisa traduzir no Google Tradutor e corre o risco de passar vergonha com termos errados.</span>
+            <li className="flex items-start gap-3">
+              <X className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+              <span>
+                {isEn
+                  ? 'Forced to use Google Translate with high risk of awkward phrasing in front of American clients.'
+                  : 'Precisa traduzir no Google Tradutor e corre o risco de passar vergonha com termos errados.'}
+              </span>
             </li>
-            <li className="flex items-start gap-2">
-              <X className="w-3.5 h-3.5 text-rose-500 shrink-0 mt-0.5" />
-              <span>Acaba desistindo de postar e perde clientes para concorrentes.</span>
+            <li className="flex items-start gap-3">
+              <X className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+              <span>
+                {isEn
+                  ? 'End up giving up on posting consistently, losing high-ticket customers to competitors.'
+                  : 'Acaba desistindo de postar e perde clientes para concorrentes.'}
+              </span>
             </li>
           </ul>
         </div>
 
         {/* Lado ZaPost */}
-        <div className="bg-emerald-950/40 border border-emerald-500/40 rounded-2xl p-4 space-y-3 shadow-lg shadow-emerald-500/5">
-          <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
-            <Check className="w-4 h-4 stroke-[3]" />
-            <span>Com o ZaPost no WhatsApp</span>
+        <div className="bg-emerald-950/40 border border-emerald-500/50 rounded-3xl p-6 sm:p-7 space-y-4 shadow-xl shadow-emerald-950/40">
+          <div className="flex items-center gap-2.5 text-emerald-400 font-extrabold text-base border-b border-emerald-500/20 pb-3">
+            <div className="w-8 h-8 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+              <Check className="w-5 h-5 stroke-[3] text-emerald-400" />
+            </div>
+            <span>{isEn ? 'With ZaPost on WhatsApp' : 'Com o ZaPost no WhatsApp'}</span>
           </div>
 
-          <ul className="space-y-2.5 text-xs text-zinc-200">
-            <li className="flex items-start gap-2">
-              <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-              <span>Você só manda uma foto e fala um áudio rápido no Zap.</span>
+          <ul className="space-y-3.5 text-xs sm:text-sm text-zinc-100 font-medium">
+            <li className="flex items-start gap-3">
+              <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+              <span>
+                {isEn
+                  ? 'Just send a job photo and talk a quick voice note on WhatsApp.'
+                  : 'Você só manda uma foto e fala um áudio rápido no Zap.'}
+              </span>
             </li>
-            <li className="flex items-start gap-2">
-              <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-              <span>Em <strong>menos de 1 minuto</strong>, recebe 3 artes diagramadas em alta resolução.</span>
+            <li className="flex items-start gap-3">
+              <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+              <span>
+                {isEn ? (
+                  <>
+                    In <strong>less than 1 minute</strong>, receive 3 designer-quality high-res graphics.
+                  </>
+                ) : (
+                  <>
+                    Em <strong>menos de 1 minuto</strong>, recebe 3 artes diagramadas em alta resolução.
+                  </>
+                )}
+              </span>
             </li>
-            <li className="flex items-start gap-2">
-              <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-              <span>Textos e legendas em inglês natural americano e português.</span>
+            <li className="flex items-start gap-3">
+              <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+              <span>
+                {isEn
+                  ? 'Native American English copy and natural Portuguese captions.'
+                  : 'Textos e legendas em inglês natural americano e português.'}
+              </span>
             </li>
-            <li className="flex items-start gap-2">
-              <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-              <span>Sua presença digital ativa toda semana sem roubar seu tempo de descanso.</span>
+            <li className="flex items-start gap-3">
+              <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+              <span>
+                {isEn
+                  ? 'Active digital presence every week without stealing your precious family rest time.'
+                  : 'Sua presença digital ativa toda semana sem roubar seu tempo de descanso.'}
+              </span>
             </li>
           </ul>
         </div>

@@ -14,14 +14,19 @@ export default function FotoPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      const url = URL.createObjectURL(file)
-      setPhotoPreview(url)
-      updateState({ photoUrl: url })
+      const reader = new FileReader()
+      reader.onload = (uploadEvent) => {
+        const base64 = uploadEvent.target?.result as string
+        setPhotoPreview(base64)
+        updateState({ photoUrl: base64 })
+      }
+      reader.readAsDataURL(file)
     }
   }
 
   const handleContinue = () => {
-    updateState({ photoUrl: photoPreview || '/sample-sala.jpg' })
+    const chosenPhoto = photoPreview || state.photoUrl || '/sample-sala.jpg'
+    updateState({ photoUrl: chosenPhoto })
     router.push('/criar/voz')
   }
 
