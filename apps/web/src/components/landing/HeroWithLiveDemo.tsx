@@ -51,8 +51,8 @@ const SAMPLE_OPTIONS: GeneratedOption[] = [
     previewUrl: '/out/clean-split_feed_45_pt.png',
     badgePt: '🏆 Direto ao Ponto & Sofisticado',
     badgeEn: '🏆 Direct & High-End Look',
-    headlinePt: 'Reserve seu horário no WhatsApp.',
-    headlineEn: 'Book your appointment via WhatsApp.',
+    headlinePt: 'Reserve seu horário hoje mesmo.',
+    headlineEn: 'Book your appointment today.',
   },
 ]
 
@@ -63,8 +63,8 @@ export function HeroWithLiveDemo() {
   const [objective, setObjective] = useState<string>('promocao')
   const [audioText, setAudioText] = useState<string>(
     isEn
-      ? 'Residential house cleaning in Framingham for only $120 through Saturday. Book on WhatsApp.'
-      : 'Faxina residencial em Framingham por apenas $120 até sábado. Agendamentos no WhatsApp.'
+      ? 'Residential house cleaning in Framingham for only $120 through Saturday. Book your spot today.'
+      : 'Faxina residencial em Framingham por apenas $120 até sábado. Agende seu horário.'
   )
   const [isGenerating, setIsGenerating] = useState<boolean>(false)
   const [hasGenerated, setHasGenerated] = useState<boolean>(false)
@@ -76,15 +76,15 @@ export function HeroWithLiveDemo() {
 
   // Atualiza automaticamente o texto de exemplo ao trocar de idioma se o usuário não tiver digitado algo personalizado
   React.useEffect(() => {
-    if (audioText === 'Faxina residencial em Framingham por apenas $120 até sábado. Agendamentos no WhatsApp.') {
+    if (audioText === 'Faxina residencial em Framingham por apenas $120 até sábado. Agende seu horário.') {
       if (isEn) {
-        setAudioText('Residential house cleaning in Framingham for only $120 through Saturday. Book on WhatsApp.')
+        setAudioText('Residential house cleaning in Framingham for only $120 through Saturday. Book your spot today.')
       }
     } else if (
-      audioText === 'Residential house cleaning in Framingham for only $120 through Saturday. Book on WhatsApp.'
+      audioText === 'Residential house cleaning in Framingham for only $120 through Saturday. Book your spot today.'
     ) {
       if (!isEn) {
-        setAudioText('Faxina residencial em Framingham por apenas $120 até sábado. Agendamentos no WhatsApp.')
+        setAudioText('Faxina residencial em Framingham por apenas $120 até sábado. Agende seu horário.')
       }
     }
   }, [isEn])
@@ -120,8 +120,8 @@ export function HeroWithLiveDemo() {
           <Zap className="w-4 h-4 fill-amber-400 text-amber-400 shrink-0" />
           <span>
             {isEn
-              ? 'WhatsApp Marketing for Small Businesses in the US'
-              : 'Marketing Digital no WhatsApp para Brasileiros nos EUA'}
+              ? 'Local Marketing for Small Businesses in the US'
+              : 'Marketing Rápido para Brasileiros nos EUA'}
           </span>
         </div>
 
@@ -136,8 +136,8 @@ export function HeroWithLiveDemo() {
 
         <p className="text-base sm:text-lg text-zinc-300 leading-relaxed max-w-xl mx-auto lg:mx-0">
           {isEn
-            ? 'A full digital marketing team inside your WhatsApp. No blank canvas, no wasting hours on Canva after an exhausting day of work.'
-            : 'Uma equipe de marketing digital que cabe no seu WhatsApp. Sem tela em branco, sem perder horas no Canva depois de um dia exaustivo de trabalho.'}
+            ? 'A full digital marketing engine right on your phone. No blank canvas, no wasting hours on Canva after an exhausting day of work.'
+            : 'Uma equipe de marketing digital direto no seu celular. Sem tela em branco, sem perder horas no Canva depois de um dia exaustivo de trabalho.'}
         </p>
 
         {/* Bullets de Benefícios */}
@@ -237,7 +237,7 @@ export function HeroWithLiveDemo() {
                 <label className="text-xs font-semibold text-zinc-300 block mb-1.5 flex items-center justify-between">
                   <span>{isEn ? '3. What do you want to say in the post?' : '3. O que você quer falar no post?'}</span>
                   <span className="text-[10px] text-emerald-400 flex items-center gap-1 font-mono">
-                    <Mic className="w-3 h-3" /> {isEn ? 'Like a voice note on WhatsApp' : 'Como um áudio no Zap'}
+                    <Mic className="w-3 h-3" /> {isEn ? 'Voice or text in seconds' : 'Fale ou digite em segundos'}
                   </span>
                 </label>
                 <textarea
@@ -394,7 +394,7 @@ export function HeroWithLiveDemo() {
               <form onSubmit={handleSignupSubmit} className="space-y-4">
                 <div>
                   <label className="text-xs font-semibold text-zinc-300 block mb-1">
-                    {isEn ? 'Your WhatsApp (US or Brazil)' : 'Seu WhatsApp (EUA ou Brasil)'}
+                    {isEn ? 'Your Phone Number' : 'Seu Telefone / WhatsApp'}
                   </label>
                   <input
                     type="tel"

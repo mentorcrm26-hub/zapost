@@ -169,16 +169,16 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
     const headlineY = isStory ? height / 2 + 220 : height / 2 + 200
     wrapText(ctx, options.headline.toUpperCase(), width / 2, headlineY, 860, 56, 3)
 
-    // 6. Rodapé: Chamada de WhatsApp
+    // 6. Rodapé: Chamada de Contato
     const footerY = isStory ? height - 160 : height - 100
-    ctx.fillStyle = '#25D366'
+    ctx.fillStyle = '#10b981'
     ctx.beginPath()
     ctx.roundRect(width / 2 - 360, footerY - 55, 720, 90, 45)
     ctx.fill()
 
     ctx.fillStyle = '#052e16'
     ctx.font = 'bold 34px sans-serif'
-    ctx.fillText(`📱 WhatsApp: ${phone}`, width / 2, footerY + 5)
+    ctx.fillText(`📱 ${isEn ? 'Call / Text' : 'Contato & Agendamento'}: ${phone}`, width / 2, footerY + 5)
   } else if (options.template === 'photo-overlay') {
     // ==================== TEMPLATE 2: PHOTO OVERLAY ====================
     // 1. Foto ocupando tudo
@@ -231,9 +231,9 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
     ctx.font = 'bold 46px sans-serif'
     wrapText(ctx, options.headline, 80, contentY + 65, 920, 60, 3)
 
-    // 5. Botão WhatsApp no rodapé
+    // 5. Botão de Contato no rodapé
     const footerY = isStory ? height - 160 : height - 100
-    ctx.fillStyle = '#25D366'
+    ctx.fillStyle = '#10b981'
     ctx.beginPath()
     ctx.roundRect(80, footerY - 50, width - 160, 85, 24)
     ctx.fill()
@@ -241,7 +241,7 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
     ctx.fillStyle = '#052e16'
     ctx.font = 'bold 34px sans-serif'
     ctx.textAlign = 'center'
-    ctx.fillText(`💬 ${isEn ? 'Book on WhatsApp' : 'Chame no WhatsApp'}: ${phone}`, width / 2, footerY + 7)
+    ctx.fillText(`💬 ${isEn ? 'Appointments' : 'Agendamentos & Contato'}: ${phone}`, width / 2, footerY + 7)
   } else {
     // ==================== TEMPLATE 3: CLEAN SPLIT ====================
     // 1. Fundo sólido profundo
@@ -419,8 +419,8 @@ export function generateDynamicCopy(rawInput: string, price: string, objective: 
       badge: isEn ? '1️⃣ Option 1: Giant Price' : '1️⃣ Opção 1: Preço Gigante',
       headlinePt: headlinePt1,
       headlineEn: headlineEn1,
-      captionPt: `${userText || 'Aproveite nossa condição especial esta semana!'} Atendimento na região de Massachusetts. Agende já pelo WhatsApp! 📲`,
-      captionEn: `Special offer available now! Top-rated service in MA. Message us on WhatsApp to book! 📲`,
+      captionPt: `${userText || 'Aproveite nossa condição especial esta semana!'} Atendimento na região de Massachusetts. Agende já o seu horário! 📲`,
+      captionEn: `Special offer available now! Top-rated service in MA. Contact us today to book! 📲`,
       tagsPt: '#promocao #servicos #boston #massachusetts #brasileirosnoseua',
       tagsEn: '#specialoffer #services #massachusetts #boston #localbusiness',
     },
@@ -430,8 +430,8 @@ export function generateDynamicCopy(rawInput: string, price: string, objective: 
       badge: isEn ? '2️⃣ Option 2: Photo Spotlight' : '2️⃣ Opção 2: Foto c/ Gradiente',
       headlinePt: headlinePt2,
       headlineEn: headlineEn2,
-      captionPt: `Confira o resultado do nosso trabalho! ✨ ${userText || 'Qualidade garantida e atendimento rápido.'} Chame no WhatsApp.`,
-      captionEn: `Take a look at our results! ✨ ${userText ? translateAndAdaptToEn(userText, cleanPrice) : 'Top rated quality and friendly service.'} Contact us on WhatsApp.`,
+      captionPt: `Confira o resultado do nosso trabalho! ✨ ${userText || 'Qualidade garantida e atendimento rápido.'} Entre em contato conosco.`,
+      captionEn: `Take a look at our results! ✨ ${userText ? translateAndAdaptToEn(userText, cleanPrice) : 'Top rated quality and friendly service.'} Contact us today.`,
       tagsPt: '#qualidade #servicosprofissionais #satisfacao #massachusetts',
       tagsEn: '#qualityservice #toprated #proservice #bostonlocal',
     },
@@ -441,8 +441,8 @@ export function generateDynamicCopy(rawInput: string, price: string, objective: 
       badge: isEn ? '3️⃣ Option 3: Clean Split' : '3️⃣ Opção 3: Divisão Limpa',
       headlinePt: headlinePt3,
       headlineEn: headlineEn3,
-      captionPt: `Compromisso e pontualidade com o seu projeto. ${userText || 'Solicite seu orçamento sem compromisso pelo WhatsApp!'} 📲`,
-      captionEn: `Reliable and punctual service. ${userText ? translateAndAdaptToEn(userText, cleanPrice) : 'Get your free estimate via WhatsApp!'} 📲`,
+      captionPt: `Compromisso e pontualidade com o seu projeto. ${userText || 'Solicite seu orçamento sem compromisso!'} 📲`,
+      captionEn: `Reliable and punctual service. ${userText ? translateAndAdaptToEn(userText, cleanPrice) : 'Get your free estimate today!'} 📲`,
       tagsPt: '#atendimentovip #pontualidade #satisfacao #massachusetts',
       tagsEn: '#residentialservice #highquality #appointment #localbusiness',
     },

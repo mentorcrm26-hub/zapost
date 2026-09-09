@@ -24,13 +24,13 @@ export function PricingSection() {
             '60 creatives per month',
             '1 language (English or Portuguese)',
             'Discreet watermark',
-            'WhatsApp support',
+            'Priority online support',
           ]
         : [
             '60 criativos por mês',
             '1 idioma (Português ou Inglês)',
             'Marca d’água discreta',
-            'Suporte via WhatsApp',
+            'Suporte prioritário online',
           ],
       popular: false,
     },

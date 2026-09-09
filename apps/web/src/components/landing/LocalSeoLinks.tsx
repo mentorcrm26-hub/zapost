@@ -60,8 +60,8 @@ export function LocalSeoLinks() {
       <p className="text-[11px] text-zinc-600 font-mono">
         © 2026 ZaPost Inc. •{' '}
         {isEn
-          ? 'WhatsApp Digital Marketing for Small Businesses in the US.'
-          : 'Marketing Digital no WhatsApp para Brasileiros nos EUA.'}
+          ? 'Fast Social Media Creatives for Small Businesses in the US.'
+          : 'Gerador de Criativos Rápidos para Empreendedores nos EUA.'}
       </p>
     </footer>
   )

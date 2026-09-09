@@ -95,8 +95,8 @@ export default function RedesPage() {
           <div className="flex items-center gap-3">
             <span className="text-2xl">💬</span>
             <div className="text-left">
-              <p className="font-bold text-sm text-zinc-100">Status do WhatsApp</p>
-              <p className="text-[11px] text-zinc-400">Direto nos seus contatos e clientes</p>
+              <p className="font-bold text-sm text-zinc-100">Stories & Status</p>
+              <p className="text-[11px] text-zinc-400">Para contatos, WhatsApp Status e Reels</p>
             </div>
           </div>
           <div className={`w-6 h-6 rounded-full flex items-center justify-center ${networks.includes('whatsapp_status') ? 'bg-emerald-500 text-white' : 'border border-white/20'}`}>

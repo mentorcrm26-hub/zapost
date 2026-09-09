@@ -2,6 +2,15 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react'
 
+export interface BrandProfile {
+  name: string
+  handle: string
+  phone: string
+  city: string
+  state: string
+  colors: string[]
+}
+
 export interface CreatePostState {
   objective: 'divulgar' | 'promocao' | 'trabalho_feito'
   photoUrl: string | null
@@ -15,6 +24,7 @@ export interface CreatePostState {
   businessName?: string
   phone?: string
   brandColor?: string
+  brandProfile?: BrandProfile
   generatedOptions: Array<{
     id: string
     name: string
@@ -34,6 +44,15 @@ export interface CreatePostState {
   }>
 }
 
+const defaultBrandProfile: BrandProfile = {
+  name: 'Bella Clean',
+  handle: '@bellaclean.ma',
+  phone: '+1 (508) 555-0142',
+  city: 'Framingham',
+  state: 'MA',
+  colors: ['#0F2E2A', '#2F6F5E', '#FFB300'],
+}
+
 const defaultState: CreatePostState = {
   objective: 'promocao',
   photoUrl: '/sample-sala.jpg',
@@ -44,6 +63,10 @@ const defaultState: CreatePostState = {
   language: 'pt',
   selectedTemplate: 'bold-price',
   credits: 10,
+  businessName: 'Bella Clean',
+  phone: '+1 (508) 555-0142',
+  brandColor: '#10b981',
+  brandProfile: defaultBrandProfile,
   generatedOptions: [
     {
       id: 'bold-price',
@@ -98,8 +121,44 @@ const CreatePostContext = createContext<CreatePostContextType | undefined>(undef
 export function CreatePostProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<CreatePostState>(defaultState)
 
+  // Carrega configurações da marca salvas no navegador
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('zapost_brand_profile')
+        if (saved) {
+          const parsed = JSON.parse(saved) as BrandProfile
+          setState((prev) => ({
+            ...prev,
+            businessName: parsed.name || prev.businessName,
+            phone: parsed.phone || prev.phone,
+            brandColor: (parsed.colors && parsed.colors[0]) || prev.brandColor,
+            brandProfile: {
+              name: parsed.name || 'Bella Clean',
+              handle: parsed.handle || '@bellaclean.ma',
+              phone: parsed.phone || '+1 (508) 555-0142',
+              city: parsed.city || 'Framingham',
+              state: parsed.state || 'MA',
+              colors: parsed.colors || ['#0F2E2A', '#2F6F5E', '#FFB300'],
+            },
+          }))
+        }
+      } catch (err) {
+        console.warn('Erro ao carregar zapost_brand_profile:', err)
+      }
+    }
+  }, [])
+
   const updateState = (updates: Partial<CreatePostState>) => {
-    setState((prev) => ({ ...prev, ...updates }))
+    setState((prev) => {
+      const next = { ...prev, ...updates }
+      if (typeof window !== 'undefined' && updates.brandProfile) {
+        try {
+          localStorage.setItem('zapost_brand_profile', JSON.stringify(updates.brandProfile))
+        } catch {}
+      }
+      return next
+    })
   }
 
   const resetFlow = () => {

@@ -84,7 +84,7 @@ export function CanvaComparison() {
             <div className="w-8 h-8 rounded-xl bg-emerald-500/20 flex items-center justify-center">
               <Check className="w-5 h-5 stroke-[3] text-emerald-400" />
             </div>
-            <span>{isEn ? 'With ZaPost on WhatsApp' : 'Com o ZaPost no WhatsApp'}</span>
+            <span>{isEn ? 'With ZaPost in 1 Minute' : 'Com o ZaPost em 1 Minuto'}</span>
           </div>
 
           <ul className="space-y-3.5 text-xs sm:text-sm text-zinc-100 font-medium">
@@ -92,8 +92,8 @@ export function CanvaComparison() {
               <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
               <span>
                 {isEn
-                  ? 'Just send a job photo and talk a quick voice note on WhatsApp.'
-                  : 'Você só manda uma foto e fala um áudio rápido no Zap.'}
+                  ? 'Just upload a job photo and speak or type what you want to offer.'
+                  : 'Você só envia a foto do serviço e fala ou digita sua oferta.'}
               </span>
             </li>
             <li className="flex items-start gap-3">

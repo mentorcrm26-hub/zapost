@@ -26,8 +26,8 @@ export function Header() {
             <span className="text-lg font-extrabold text-white tracking-tight leading-none group-hover:text-emerald-300 transition-colors">
               ZaPost
             </span>
-            <span className="text-[11px] text-emerald-300 font-medium tracking-wide">
-              {isEn ? 'Marketing on WhatsApp' : 'Marketing no Zap'}
+            <span className="text-[10px] text-zinc-400 font-medium tracking-wide">
+              {isEn ? 'Creatives in 1 Min' : 'Criativos em 1 Minuto'}
             </span>
           </div>
         </Link>

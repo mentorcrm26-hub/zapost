@@ -21,8 +21,8 @@ const EXAMPLES: ExamplePair[] = [
     title: 'Limpeza Residencial & Comercial',
     ptImage: '/out/bold-price_feed_45_pt.png',
     enImage: '/out/bold-price_feed_45_en.png',
-    headlinePt: 'Faxina Completa por apenas $120. Agende no WhatsApp!',
-    headlineEn: 'Deep House Cleaning starting at $120. Book on WhatsApp!',
+    headlinePt: 'Faxina Completa por apenas $120. Agende seu horário!',
+    headlineEn: 'Deep House Cleaning starting at $120. Book your spot today!',
     tags: 'Boston, MA • Orlando, FL',
   },
   {

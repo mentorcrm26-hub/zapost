@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Sparkles, Save, Check, Plus, Trash2, Palette, RefreshCw } from 'lucide-react'
+import { useCreatePost, BrandProfile } from '@/context/CreatePostContext'
 
 interface PresetPalette {
   name: string
@@ -51,13 +52,29 @@ const COLOR_ROLES = [
 ]
 
 export default function MinhaMarcaPage() {
-  const [name, setName] = useState('Bella Clean')
-  const [handle, setHandle] = useState('@bellaclean.ma')
-  const [phone, setPhone] = useState('+1 (508) 555-0142')
-  const [city, setCity] = useState('Framingham')
-  const [state, setState] = useState('MA')
-  const [colors, setColors] = useState(['#0F2E2A', '#2F6F5E', '#FFB300'])
+  const { state: appState, updateState } = useCreatePost()
+
+  const [name, setName] = useState(appState.brandProfile?.name || appState.businessName || 'Bella Clean')
+  const [handle, setHandle] = useState(appState.brandProfile?.handle || '@bellaclean.ma')
+  const [phone, setPhone] = useState(appState.brandProfile?.phone || appState.phone || '+1 (508) 555-0142')
+  const [city, setCity] = useState(appState.brandProfile?.city || 'Framingham')
+  const [state, setState] = useState(appState.brandProfile?.state || 'MA')
+  const [colors, setColors] = useState<string[]>(
+    appState.brandProfile?.colors || ['#0F2E2A', '#2F6F5E', '#FFB300']
+  )
   const [saved, setSaved] = useState(false)
+
+  // Sincroniza se o estado do contexto for carregado do localStorage
+  useEffect(() => {
+    if (appState.brandProfile) {
+      setName(appState.brandProfile.name)
+      setHandle(appState.brandProfile.handle)
+      setPhone(appState.brandProfile.phone)
+      setCity(appState.brandProfile.city)
+      setState(appState.brandProfile.state)
+      setColors(appState.brandProfile.colors)
+    }
+  }, [appState.brandProfile])
 
   const handleColorChange = (index: number, newColor: string) => {
     const updated = [...colors]
@@ -84,8 +101,31 @@ export default function MinhaMarcaPage() {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault()
+
+    const updatedProfile: BrandProfile = {
+      name: name.trim() || 'Minha Empresa',
+      handle: handle.trim() || '@minhaempresa',
+      phone: phone.trim() || '(508) 555-0142',
+      city: city.trim() || 'Framingham',
+      state: state.trim() || 'MA',
+      colors: colors.length >= 2 ? colors : ['#0F2E2A', '#2F6F5E', '#FFB300'],
+    }
+
+    // Persiste no localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('zapost_brand_profile', JSON.stringify(updatedProfile))
+    }
+
+    // Atualiza o contexto global da aplicação
+    updateState({
+      businessName: updatedProfile.name,
+      phone: updatedProfile.phone,
+      brandColor: updatedProfile.colors[0],
+      brandProfile: updatedProfile,
+    })
+
     setSaved(true)
-    setTimeout(() => setSaved(false), 3000)
+    setTimeout(() => setSaved(false), 3500)
   }
 
   return (
@@ -136,7 +176,7 @@ export default function MinhaMarcaPage() {
 
           <div className="bg-zinc-900/90 border border-white/10 rounded-2xl p-4 flex flex-col gap-1.5 shadow-md">
             <label className="text-xs font-bold uppercase tracking-wider text-zinc-300">
-              WhatsApp Comercial
+              Telefone Comercial & Contato
             </label>
             <input
               type="text"
