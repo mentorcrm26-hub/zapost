@@ -49,6 +49,12 @@ export default function ProntinhoPage() {
           name: updated.templateId || opt.name,
           headlinePt: updated.headlinePt,
           headlineEn: updated.headlineEn,
+          showPrice: updated.showPrice,
+          photoOffsetX: updated.photoOffsetX,
+          photoOffsetY: updated.photoOffsetY,
+          photoScale: updated.photoScale,
+          ctaTextPt: updated.ctaTextPt,
+          ctaTextEn: updated.ctaTextEn,
           previewUrl: updated.previewUrl,
           previewUrlEn: updated.previewUrlEn,
           finalUrl: updated.finalUrl,
@@ -63,7 +69,7 @@ export default function ProntinhoPage() {
     updateState({
       generatedOptions: nextOptions,
       selectedTemplate: updated.templateId || state.selectedTemplate,
-      price: updated.price || state.price,
+      price: updated.price !== undefined ? updated.price : state.price,
       businessName: updated.businessName || state.businessName,
       phone: updated.phone || state.phone,
       brandColor: updated.brandColor || state.brandColor,
@@ -89,10 +95,10 @@ export default function ProntinhoPage() {
           <button
             type="button"
             onClick={() => setIsEditorOpen(true)}
-            className="flex items-center gap-1.5 text-xs font-bold text-emerald-300 bg-black/40 border border-emerald-500/30 px-3 py-1.5 rounded-full hover:bg-black/60 transition-colors shadow-sm"
+            className="flex items-center gap-1.5 text-xs font-extrabold text-emerald-300 bg-black/50 border border-emerald-500/40 px-3.5 py-2 rounded-full hover:bg-black/70 transition-all shadow-md active:scale-95 touch-target"
           >
             <Edit3 className="w-3.5 h-3.5" />
-            <span>Fazer ajustes rápidos na arte</span>
+            <span>Fazer ajustes ou mover a foto</span>
           </button>
         </div>
       </div>
@@ -282,10 +288,16 @@ export default function ProntinhoPage() {
             templateId: (selectedOpt.id || 'bold-price') as TemplateId,
             headlinePt: selectedOpt.headlinePt,
             headlineEn: selectedOpt.headlineEn,
-            price: state.price || '$120',
+            price: state.price || '',
+            showPrice: (selectedOpt as any).showPrice !== false,
+            photoOffsetX: (selectedOpt as any).photoOffsetX || 0,
+            photoOffsetY: (selectedOpt as any).photoOffsetY || 0,
+            photoScale: (selectedOpt as any).photoScale || 1.0,
+            ctaTextPt: (selectedOpt as any).ctaTextPt,
+            ctaTextEn: (selectedOpt as any).ctaTextEn,
             photoUrl: state.photoUrl || '/sample-sala.jpg',
-            businessName: state.businessName || 'Bella Clean',
-            phone: state.phone || '(508) 555-0142',
+            businessName: state.businessName || 'Livia Maria',
+            phone: state.phone || '(407) 474-2138',
             brandColor: state.brandColor || '#10b981',
             language: state.language || 'pt',
           }}

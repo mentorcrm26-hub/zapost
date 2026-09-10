@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Check, Sparkles, ZoomIn, Edit3, SlidersHorizontal } from 'lucide-react'
+import { Check, Sparkles, ZoomIn, SlidersHorizontal } from 'lucide-react'
 import { useCreatePost } from '@/context/CreatePostContext'
 import { CreativeLiveEditor } from '@/components/creative/CreativeLiveEditor'
 import { TemplateId } from '@/lib/render-creative'
@@ -29,13 +29,16 @@ export default function EscolhaPage() {
       templateId: (opt.id || 'bold-price') as TemplateId,
       headlinePt: opt.headlinePt,
       headlineEn: opt.headlineEn,
-      price: state.price || '$120',
+      price: state.price || opt.price || '',
       showPrice: opt.showPrice !== false,
+      photoOffsetX: opt.photoOffsetX || 0,
+      photoOffsetY: opt.photoOffsetY || 0,
+      photoScale: opt.photoScale || 1.0,
       ctaTextPt: opt.ctaTextPt,
       ctaTextEn: opt.ctaTextEn,
       photoUrl: state.photoUrl || '/sample-sala.jpg',
-      businessName: state.businessName || 'Bella Clean',
-      phone: state.phone || '(508) 555-0142',
+      businessName: state.businessName || 'Livia Maria',
+      phone: state.phone || '(407) 474-2138',
       brandColor: state.brandColor || '#10b981',
       language: state.language || 'pt',
     })
@@ -51,6 +54,9 @@ export default function EscolhaPage() {
           headlinePt: updated.headlinePt,
           headlineEn: updated.headlineEn,
           showPrice: updated.showPrice,
+          photoOffsetX: updated.photoOffsetX,
+          photoOffsetY: updated.photoOffsetY,
+          photoScale: updated.photoScale,
           ctaTextPt: updated.ctaTextPt,
           ctaTextEn: updated.ctaTextEn,
           previewUrl: updated.previewUrl,
@@ -67,7 +73,7 @@ export default function EscolhaPage() {
     updateState({
       generatedOptions: nextOptions,
       selectedTemplate: updated.templateId || selectedId,
-      price: updated.price || state.price,
+      price: updated.price !== undefined ? updated.price : state.price,
       businessName: updated.businessName || state.businessName,
       phone: updated.phone || state.phone,
       brandColor: updated.brandColor || state.brandColor,
@@ -86,7 +92,7 @@ export default function EscolhaPage() {
           Qual opção você mais gostou?
         </h1>
         <p className="text-xs text-zinc-400 mt-1">
-          Toque para escolher ou clique em <b>"Personalizar"</b> para editar 100% dos textos, valor e botões.
+          Toque para escolher ou clique em <b>"Personalizar"</b> para editar textos, mover a foto e ajustar botões.
         </p>
       </div>
 
@@ -121,7 +127,7 @@ export default function EscolhaPage() {
                     type="button"
                     onClick={(e) => handleOpenEditor(e, opt)}
                     className="flex items-center gap-1.5 text-xs font-extrabold text-emerald-300 bg-emerald-950/80 border border-emerald-500/50 px-3 py-1.5 rounded-xl hover:bg-emerald-900 shadow-sm transition-all active:scale-95 touch-target min-h-[36px]"
-                    title="Editar textos, preço e rodapé deste criativo"
+                    title="Editar textos, mover foto e ajustar detalhes deste criativo"
                   >
                     <SlidersHorizontal className="w-3.5 h-3.5 text-emerald-400" />
                     <span>Personalizar Arte</span>

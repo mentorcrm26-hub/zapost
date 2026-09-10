@@ -11,10 +11,16 @@ export interface RenderCreativeOptions {
   format: 'feed' | 'story'
   language: 'pt' | 'en'
   photoUrl: string
+  photoOffsetX?: number // Deslocamento X da foto em % (-50 a +50)
+  photoOffsetY?: number // Deslocamento Y da foto em % (-50 a +50)
+  photoScale?: number   // Escala / Zoom da foto (1.0 a 2.5)
+  textOffsetX?: number  // Deslocamento X dos textos em % (-40 a +40)
+  textOffsetY?: number  // Deslocamento Y dos textos em % (-40 a +40)
+  textAlign?: 'left' | 'center' | 'right'
   headline: string
   subheadline?: string
   caption?: string
-  price?: string
+  price?: string        // Texto de destaque / Preço (sem prefixos forçados)
   showPrice?: boolean
   ctaText?: string
   businessName?: string
@@ -176,12 +182,18 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
   const isEn = options.language === 'en'
   const businessName = options.businessName || 'BELLA CLEAN'
   const phone = options.phone || '(508) 555-0142'
+  
+  // 100% fiel ao que o usuário digitou, sem '$' forçado
   const rawPrice = options.price ? options.price.trim() : ''
   const hasPrice = options.showPrice !== false && rawPrice.length > 0
-  const price = hasPrice ? (rawPrice.startsWith('$') ? rawPrice : `$${rawPrice}`) : ''
+  const price = hasPrice ? rawPrice : ''
   
   const brandColor = options.brandColor || '#10b981'
   const accentColor = options.accentColor || '#f59e0b'
+
+  // Deslocamento dos textos na tela
+  const textShiftX = ((options.textOffsetX || 0) / 100) * width
+  const textShiftY = ((options.textOffsetY || 0) / 100) * height
 
   // Texto do botão de rodapé customizado
   const defaultCtaText = isEn
@@ -194,22 +206,27 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
   // Carrega a foto real do usuário
   const img = await loadImage(options.photoUrl || '/sample-sala.jpg')
 
-  // Helper de desenho da foto em tela cheia com cover
+  // Helper de desenho da foto em tela cheia com posicionamento e zoom personalizados
   const drawCoverImage = () => {
     const imgAspect = img.width / img.height
     const canvasAspect = width / height
-    let drawW = width
-    let drawH = height
-    let offsetX = 0
-    let offsetY = 0
+    const scale = options.photoScale || 1.0
+    const extraOffsetX = ((options.photoOffsetX || 0) / 100) * width
+    const extraOffsetY = ((options.photoOffsetY || 0) / 100) * height
 
+    let baseW = width
+    let baseH = height
     if (imgAspect > canvasAspect) {
-      drawW = height * imgAspect
-      offsetX = (width - drawW) / 2
+      baseW = height * imgAspect
     } else {
-      drawH = width / imgAspect
-      offsetY = (height - drawH) / 2
+      baseH = width / imgAspect
     }
+
+    const drawW = baseW * scale
+    const drawH = baseH * scale
+    const offsetX = (width - drawW) / 2 + extraOffsetX
+    const offsetY = (height - drawH) / 2 + extraOffsetY
+
     ctx.drawImage(img, offsetX, offsetY, drawW, drawH)
   }
 
@@ -229,55 +246,55 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
     ctx.fillStyle = '#ffffff'
     ctx.font = 'bold 36px sans-serif'
     ctx.textAlign = 'center'
-    ctx.fillText(`✨ ${businessName.toUpperCase()} ✨`, width / 2, isStory ? 180 : 100)
+    ctx.fillText(`✨ ${businessName.toUpperCase()} ✨`, width / 2 + textShiftX, (isStory ? 180 : 100) + textShiftY * 0.4)
 
     ctx.fillStyle = brandColor
     ctx.font = 'bold 22px sans-serif'
-    ctx.fillText(isEn ? 'SPECIAL OFFER' : 'OFERTA ESPECIAL', width / 2, isStory ? 230 : 145)
+    ctx.fillText(isEn ? 'SPECIAL OFFER' : 'OFERTA ESPECIAL', width / 2 + textShiftX, (isStory ? 230 : 145) + textShiftY * 0.4)
 
-    // Centro: Badge de Preço (somente se showPrice estiver ativo)
+    // Centro: Badge de Preço / Destaque Secundário (deslocado por textShiftX / textShiftY)
     if (hasPrice) {
-      const badgeY = isStory ? height / 2 - 120 : height / 2 - 60
+      const badgeY = (isStory ? height / 2 - 120 : height / 2 - 60) + textShiftY
+      const badgeX = width / 2 + textShiftX
       ctx.fillStyle = 'rgba(0, 0, 0, 0.82)'
       ctx.beginPath()
-      ctx.roundRect(width / 2 - 280, badgeY - 110, 560, 220, 36)
+      ctx.roundRect(badgeX - 300, badgeY - 100, 600, 200, 36)
       ctx.fill()
       ctx.lineWidth = 6
       ctx.strokeStyle = brandColor
       ctx.stroke()
 
-      ctx.fillStyle = '#ffffff'
-      ctx.font = 'bold 26px sans-serif'
-      ctx.fillText(isEn ? 'STARTING AT ONLY' : 'A PARTIR DE APENAS', width / 2, badgeY - 45)
-
       ctx.fillStyle = accentColor
-      ctx.font = '900 110px sans-serif'
-      ctx.fillText(price, width / 2, badgeY + 60)
+      const fontSize = price.length > 10 ? '54px' : price.length > 6 ? '80px' : '100px'
+      ctx.font = `900 ${fontSize} sans-serif`
+      ctx.fillText(price, badgeX, badgeY + 25)
 
       // Headline abaixo do preço
       ctx.fillStyle = '#ffffff'
       ctx.font = 'bold 44px sans-serif'
-      const headlineY = isStory ? height / 2 + 220 : height / 2 + 200
-      wrapText(ctx, options.headline.toUpperCase(), width / 2, headlineY, 860, 56, 3)
+      const headlineY = (isStory ? height / 2 + 220 : height / 2 + 200) + textShiftY
+      wrapText(ctx, options.headline.toUpperCase(), badgeX, headlineY, 860, 56, 3)
     } else {
-      // Sem preço: Headline centralizada e imponente
+      // Sem preço: Headline centralizada e deslocável
       ctx.fillStyle = '#ffffff'
       ctx.font = 'bold 54px sans-serif'
-      const headlineY = isStory ? height / 2 - 40 : height / 2 - 30
-      wrapText(ctx, options.headline.toUpperCase(), width / 2, headlineY, 920, 68, 4)
+      const headlineY = (isStory ? height / 2 - 40 : height / 2 - 30) + textShiftY
+      const headlineX = width / 2 + textShiftX
+      wrapText(ctx, options.headline.toUpperCase(), headlineX, headlineY, 920, 68, 4)
     }
 
-    // Rodapé com texto editável
-    const footerY = isStory ? height - 160 : height - 100
+    // Rodapé
+    const footerY = (isStory ? height - 160 : height - 100) + textShiftY * 0.2
+    const footerX = width / 2 + textShiftX * 0.3
     ctx.fillStyle = brandColor
     ctx.beginPath()
-    ctx.roundRect(width / 2 - 380, footerY - 55, 760, 90, 45)
+    ctx.roundRect(footerX - 380, footerY - 55, 760, 90, 45)
     ctx.fill()
 
     ctx.fillStyle = '#052e16'
     ctx.font = 'bold 32px sans-serif'
     ctx.textAlign = 'center'
-    ctx.fillText(footerButtonText, width / 2, footerY + 5)
+    ctx.fillText(footerButtonText, footerX, footerY + 5)
   } else if (options.template === 'photo-overlay') {
     // ==================== TEMPLATE 2: PHOTO OVERLAY ====================
     drawCoverImage()
@@ -289,44 +306,52 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
     ctx.fillStyle = grad
     ctx.fillRect(0, height * 0.35, width, height * 0.65)
 
-    // Badge flutuante de preço (se ativo)
+    // Badge flutuante de preço / texto extra (se ativo)
     if (hasPrice) {
+      const badgeW = Math.max(260, price.length * 28 + 60)
+      const badgeX = width - badgeW - 60 + textShiftX
+      const badgeY = (isStory ? 140 : 60) + textShiftY * 0.5
+
       ctx.fillStyle = 'rgba(15, 46, 42, 0.92)'
       ctx.beginPath()
-      ctx.roundRect(width - 320, isStory ? 140 : 60, 260, 100, 24)
+      ctx.roundRect(badgeX, badgeY, badgeW, 90, 24)
       ctx.fill()
       ctx.lineWidth = 4
       ctx.strokeStyle = accentColor
       ctx.stroke()
 
       ctx.fillStyle = accentColor
-      ctx.font = '900 52px sans-serif'
+      const fSize = price.length > 10 ? '38px' : '48px'
+      ctx.font = `900 ${fSize} sans-serif`
       ctx.textAlign = 'center'
-      ctx.fillText(price, width - 190, isStory ? 212 : 132)
+      ctx.fillText(price, badgeX + badgeW / 2, badgeY + 62)
     }
 
-    // Card de Conteúdo Inferior
+    // Card de Conteúdo Inferior (deslocável)
+    const contentX = 80 + textShiftX
+    const contentY = (isStory ? height - 520 : height - 380) + textShiftY
+
     ctx.textAlign = 'left'
     ctx.fillStyle = brandColor
     ctx.font = 'bold 28px sans-serif'
-    const contentY = isStory ? height - 520 : height - 380
-    ctx.fillText(`✨ ${businessName.toUpperCase()}`, 80, contentY)
+    ctx.fillText(`✨ ${businessName.toUpperCase()}`, contentX, contentY)
 
     ctx.fillStyle = '#ffffff'
     ctx.font = 'bold 46px sans-serif'
-    wrapText(ctx, options.headline, 80, contentY + 65, 920, 60, 3)
+    wrapText(ctx, options.headline, contentX, contentY + 65, 920, 60, 3)
 
-    // Rodapé com texto editável
-    const footerY = isStory ? height - 160 : height - 100
+    // Rodapé
+    const footerY = (isStory ? height - 160 : height - 100) + textShiftY * 0.2
+    const footerX = 80 + textShiftX * 0.3
     ctx.fillStyle = '#10b981'
     ctx.beginPath()
-    ctx.roundRect(80, footerY - 50, width - 160, 85, 24)
+    ctx.roundRect(footerX, footerY - 50, width - 160, 85, 24)
     ctx.fill()
 
     ctx.fillStyle = '#052e16'
     ctx.font = 'bold 32px sans-serif'
     ctx.textAlign = 'center'
-    ctx.fillText(footerButtonText, width / 2, footerY + 7)
+    ctx.fillText(footerButtonText, width / 2 + textShiftX * 0.3, footerY + 7)
   } else if (options.template === 'clean-split') {
     // ==================== TEMPLATE 3: CLEAN SPLIT ====================
     ctx.fillStyle = '#0b0f17'
@@ -343,18 +368,23 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
 
     const imgAspect = img.width / img.height
     const boxAspect = photoW / (photoH - 60)
-    let dW = photoW
-    let dH = photoH - 60
-    let ox = margin
-    let oy = margin + (isStory ? 80 : 20)
+    const scale = options.photoScale || 1.0
+    const extraOffsetX = ((options.photoOffsetX || 0) / 100) * photoW
+    const extraOffsetY = ((options.photoOffsetY || 0) / 100) * (photoH - 60)
 
+    let baseW = photoW
+    let baseH = photoH - 60
     if (imgAspect > boxAspect) {
-      dW = (photoH - 60) * imgAspect
-      ox = margin + (photoW - dW) / 2
+      baseW = (photoH - 60) * imgAspect
     } else {
-      dH = photoW / imgAspect
-      oy = margin + (isStory ? 80 : 20) + (photoH - 60 - dH) / 2
+      baseH = photoW / imgAspect
     }
+
+    const dW = baseW * scale
+    const dH = baseH * scale
+    const ox = margin + (photoW - dW) / 2 + extraOffsetX
+    const oy = margin + (isStory ? 80 : 20) + (photoH - 60 - dH) / 2 + extraOffsetY
+
     ctx.drawImage(img, ox, oy, dW, dH)
     ctx.restore()
 
@@ -364,35 +394,38 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
     ctx.roundRect(margin, margin + (isStory ? 80 : 20), photoW, photoH - 60, 36)
     ctx.stroke()
 
-    const bottomStartY = photoH + (isStory ? 100 : 40)
+    // Bloco de Textos inferior deslocável
+    const bottomStartY = (photoH + (isStory ? 100 : 40)) + textShiftY
+    const leftX = margin + textShiftX
 
     ctx.fillStyle = brandColor
     ctx.font = 'bold 26px sans-serif'
     ctx.textAlign = 'left'
-    ctx.fillText(`🏆 ${businessName.toUpperCase()}`, margin, bottomStartY)
+    ctx.fillText(`🏆 ${businessName.toUpperCase()}`, leftX, bottomStartY)
 
     if (hasPrice) {
       ctx.fillStyle = accentColor
-      ctx.font = '900 48px sans-serif'
+      const fSize = price.length > 10 ? '36px' : '48px'
+      ctx.font = `900 ${fSize} sans-serif`
       ctx.textAlign = 'right'
-      ctx.fillText(price, width - margin, bottomStartY)
+      ctx.fillText(price, width - margin + textShiftX, bottomStartY)
     }
 
     ctx.fillStyle = '#ffffff'
     ctx.font = 'bold 44px sans-serif'
     ctx.textAlign = 'left'
-    wrapText(ctx, options.headline, margin, bottomStartY + 65, photoW, 58, 3)
+    wrapText(ctx, options.headline, leftX, bottomStartY + 65, photoW, 58, 3)
 
-    const footerY = isStory ? height - 160 : height - 90
+    const footerY = (isStory ? height - 160 : height - 90) + textShiftY * 0.2
     ctx.fillStyle = '#25D366'
     ctx.beginPath()
-    ctx.roundRect(margin, footerY - 50, photoW, 85, 24)
+    ctx.roundRect(margin + textShiftX * 0.3, footerY - 50, photoW, 85, 24)
     ctx.fill()
 
     ctx.fillStyle = '#052e16'
     ctx.font = 'bold 32px sans-serif'
     ctx.textAlign = 'center'
-    ctx.fillText(footerButtonText, width / 2, footerY + 6)
+    ctx.fillText(footerButtonText, width / 2 + textShiftX * 0.3, footerY + 6)
   } else if (options.template === 'proof-card') {
     // ==================== TEMPLATE 4: PROOF CARD (5 ESTRELAS) ====================
     drawCoverImage()
@@ -405,15 +438,18 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
     ctx.fillStyle = grad
     ctx.fillRect(0, 0, width, height)
 
+    // Topo
     ctx.textAlign = 'center'
     ctx.fillStyle = '#ffffff'
     ctx.font = 'bold 32px sans-serif'
-    ctx.fillText(`✨ ${businessName.toUpperCase()}`, width / 2, isStory ? 160 : 80)
+    ctx.fillText(`✨ ${businessName.toUpperCase()}`, width / 2 + textShiftX, (isStory ? 160 : 80) + textShiftY * 0.4)
 
-    const cardY = isStory ? height / 2 - 160 : height / 2 - 110
+    // Card Central de Prova Social (movimentável via textShiftX / textShiftY)
+    const cardY = (isStory ? height / 2 - 160 : height / 2 - 110) + textShiftY
     const cardW = 920
     const cardH = isStory ? 580 : 500
-    const cardX = (width - cardW) / 2
+    const cardX = (width - cardW) / 2 + textShiftX
+    const centerX = width / 2 + textShiftX
 
     ctx.fillStyle = 'rgba(15, 23, 42, 0.85)'
     ctx.beginPath()
@@ -425,35 +461,36 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
 
     ctx.fillStyle = '#fbbf24'
     ctx.font = '48px sans-serif'
-    ctx.fillText('★★★★★', width / 2, cardY + 70)
+    ctx.fillText('★★★★★', centerX, cardY + 70)
 
     ctx.fillStyle = '#94a3b8'
     ctx.font = 'bold 20px sans-serif'
-    ctx.fillText(isEn ? '5.0 RATED BY 100+ CLIENTS' : 'AVALIAÇÃO 5.0 • 100% SATISFAÇÃO', width / 2, cardY + 115)
+    ctx.fillText(isEn ? '5.0 RATED BY 100+ CLIENTS' : 'AVALIAÇÃO 5.0 • 100% SATISFAÇÃO', centerX, cardY + 115)
 
     ctx.fillStyle = '#ffffff'
     ctx.font = 'bold 44px sans-serif'
-    wrapText(ctx, `“${options.headline}”`, width / 2, cardY + 190, 820, 56, 3)
+    wrapText(ctx, `“${options.headline}”`, centerX, cardY + 190, 820, 56, 3)
 
     if (hasPrice) {
       ctx.fillStyle = accentColor
-      ctx.font = '900 64px sans-serif'
-      ctx.fillText(price, width / 2, cardY + (isStory ? 430 : 380))
+      const fSize = price.length > 10 ? '48px' : '64px'
+      ctx.font = `900 ${fSize} sans-serif`
+      ctx.fillText(price, centerX, cardY + (isStory ? 430 : 380))
     }
 
     ctx.fillStyle = '#10b981'
     ctx.font = 'bold 22px sans-serif'
-    ctx.fillText(isEn ? '🛡️ 100% Satisfaction Guaranteed' : '🛡️ Garantia de Excelência & Pontualidade', width / 2, cardY + (hasPrice ? (isStory ? 480 : 430) : (isStory ? 400 : 350)))
+    ctx.fillText(isEn ? '🛡️ 100% Satisfaction Guaranteed' : '🛡️ Garantia de Excelência & Pontualidade', centerX, cardY + (hasPrice ? (isStory ? 480 : 430) : (isStory ? 400 : 350)))
 
-    const footerY = isStory ? height - 160 : height - 90
+    const footerY = (isStory ? height - 160 : height - 90) + textShiftY * 0.2
     ctx.fillStyle = '#10b981'
     ctx.beginPath()
-    ctx.roundRect(cardX, footerY - 50, cardW, 85, 24)
+    ctx.roundRect((width - cardW) / 2 + textShiftX * 0.3, footerY - 50, cardW, 85, 24)
     ctx.fill()
 
     ctx.fillStyle = '#052e16'
     ctx.font = 'bold 32px sans-serif'
-    ctx.fillText(footerButtonText, width / 2, footerY + 6)
+    ctx.fillText(footerButtonText, width / 2 + textShiftX * 0.3, footerY + 6)
   } else if (options.template === 'minimal-luxury') {
     // ==================== TEMPLATE 5: MINIMAL LUXURY ====================
     ctx.fillStyle = '#08080a'
@@ -471,11 +508,11 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
     ctx.textAlign = 'center'
     ctx.fillStyle = '#d4af37'
     ctx.font = 'bold 20px serif'
-    ctx.fillText(`— ${businessName.toUpperCase()} —`, width / 2, isStory ? 140 : 100)
+    ctx.fillText(`— ${businessName.toUpperCase()} —`, width / 2 + textShiftX, (isStory ? 140 : 100) + textShiftY * 0.4)
 
     ctx.fillStyle = '#ffffff'
     ctx.font = '300 16px sans-serif'
-    ctx.fillText(isEn ? 'PREMIUM & RELIABLE SERVICE' : 'SERVIÇO PREMIUM & EXCLUSIVO', width / 2, isStory ? 180 : 135)
+    ctx.fillText(isEn ? 'PREMIUM & RELIABLE SERVICE' : 'SERVIÇO PREMIUM & EXCLUSIVO', width / 2 + textShiftX, (isStory ? 180 : 135) + textShiftY * 0.4)
 
     const photoSize = isStory ? 600 : 480
     const photoY = isStory ? 240 : 180
@@ -487,18 +524,23 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
     ctx.clip()
 
     const imgAspect = img.width / img.height
-    let dW = photoSize
-    let dH = photoSize
-    let ox = photoX
-    let oy = photoY
+    const scale = options.photoScale || 1.0
+    const extraOffsetX = ((options.photoOffsetX || 0) / 100) * photoSize
+    const extraOffsetY = ((options.photoOffsetY || 0) / 100) * photoSize
 
+    let baseW = photoSize
+    let baseH = photoSize
     if (imgAspect > 1) {
-      dW = photoSize * imgAspect
-      ox = photoX + (photoSize - dW) / 2
+      baseW = photoSize * imgAspect
     } else {
-      dH = photoSize / imgAspect
-      oy = photoY + (photoSize - dH) / 2
+      baseH = photoSize / imgAspect
     }
+
+    const dW = baseW * scale
+    const dH = baseH * scale
+    const ox = photoX + (photoSize - dW) / 2 + extraOffsetX
+    const oy = photoY + (photoSize - dH) / 2 + extraOffsetY
+
     ctx.drawImage(img, ox, oy, dW, dH)
     ctx.restore()
 
@@ -508,21 +550,25 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
     ctx.roundRect(photoX, photoY, photoSize, photoSize, 28)
     ctx.stroke()
 
-    const contentStartY = photoY + photoSize + (isStory ? 70 : 45)
+    // Conteúdo Inferior Deslocável
+    const contentStartY = (photoY + photoSize + (isStory ? 70 : 45)) + textShiftY
+    const centerX = width / 2 + textShiftX
+
     ctx.fillStyle = '#ffffff'
     ctx.font = 'bold 38px serif'
-    wrapText(ctx, options.headline, width / 2, contentStartY, 880, 50, 2)
+    wrapText(ctx, options.headline, centerX, contentStartY, 880, 50, 2)
 
     if (hasPrice) {
       ctx.fillStyle = '#d4af37'
-      ctx.font = 'bold 50px sans-serif'
-      ctx.fillText(price, width / 2, contentStartY + (isStory ? 140 : 110))
+      const fSize = price.length > 10 ? '38px' : '50px'
+      ctx.font = `bold ${fSize} sans-serif`
+      ctx.fillText(price, centerX, contentStartY + (isStory ? 140 : 110))
     }
 
-    const footerY = isStory ? height - 140 : height - 85
+    const footerY = (isStory ? height - 140 : height - 85) + textShiftY * 0.2
     ctx.fillStyle = '#d4af37'
     ctx.font = 'bold 24px sans-serif'
-    ctx.fillText(footerButtonText, width / 2, footerY)
+    ctx.fillText(footerButtonText, width / 2 + textShiftX * 0.3, footerY)
   } else if (options.template === 'urgent-promo') {
     // ==================== TEMPLATE 6: URGENT PROMO (URGÊNCIA & FLASH SALE) ====================
     drawCoverImage()
@@ -543,31 +589,35 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
     ctx.textAlign = 'center'
     ctx.fillText(isEn ? '🔥 LIMITED TIME OFFER • ONLY THIS WEEK' : '🔥 ÚLTIMAS VAGAS • SOMENTE ESSA SEMANA', width / 2, isStory ? 125 : 75)
 
+    const centerX = width / 2 + textShiftX
+
     ctx.fillStyle = '#e2e8f0'
     ctx.font = 'bold 32px sans-serif'
-    ctx.fillText(businessName.toUpperCase(), width / 2, isStory ? 220 : 155)
+    ctx.fillText(businessName.toUpperCase(), centerX, (isStory ? 220 : 155) + textShiftY * 0.4)
 
     ctx.fillStyle = '#ffffff'
     ctx.font = '900 48px sans-serif'
-    const headlineY = isStory ? height / 2 - 80 : height / 2 - 30
-    wrapText(ctx, options.headline.toUpperCase(), width / 2, headlineY, 920, 60, 3)
+    const headlineY = (isStory ? height / 2 - 80 : height / 2 - 30) + textShiftY
+    wrapText(ctx, options.headline.toUpperCase(), centerX, headlineY, 920, 60, 3)
 
     if (hasPrice) {
-      const badgeY = isStory ? height / 2 + 180 : height / 2 + 160
+      const badgeY = (isStory ? height / 2 + 180 : height / 2 + 160) + textShiftY
+      const badgeW = Math.max(520, price.length * 30 + 80)
       ctx.fillStyle = '#f59e0b'
       ctx.beginPath()
-      ctx.roundRect(width / 2 - 260, badgeY - 70, 520, 140, 28)
+      ctx.roundRect(centerX - badgeW / 2, badgeY - 70, badgeW, 140, 28)
       ctx.fill()
 
       ctx.fillStyle = '#0f172a'
-      ctx.font = '900 80px sans-serif'
-      ctx.fillText(price, width / 2, badgeY + 30)
+      const fSize = price.length > 10 ? '56px' : '80px'
+      ctx.font = `900 ${fSize} sans-serif`
+      ctx.fillText(price, centerX, badgeY + 30)
     }
 
-    const footerY = isStory ? height - 160 : height - 90
+    const footerY = (isStory ? height - 160 : height - 90) + textShiftY * 0.2
     ctx.fillStyle = '#10b981'
     ctx.beginPath()
-    ctx.roundRect(width / 2 - 380, footerY - 55, 760, 95, 48)
+    ctx.roundRect(centerX - 380, footerY - 55, 760, 95, 48)
     ctx.fill()
     ctx.lineWidth = 4
     ctx.strokeStyle = '#34d399'
@@ -575,7 +625,7 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
 
     ctx.fillStyle = '#052e16'
     ctx.font = '900 34px sans-serif'
-    ctx.fillText(footerButtonText, width / 2, footerY + 8)
+    ctx.fillText(footerButtonText, centerX, footerY + 8)
   }
 
   if (options.withWatermark) {
@@ -595,7 +645,7 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
 
 // Dicionário e gerador dinâmico de cópias fiéis ao input do usuário
 export function translateAndAdaptToEn(text: string, price: string): string {
-  if (!text) return `Special Offer for only ${price}!`
+  if (!text) return `Special Offer!`
   let t = text.trim()
   
   t = t.replace(/^(eu quero divulgar|divulga|post sobre|estou fazendo|faço|ofereço)\s+/i, '')
@@ -620,7 +670,7 @@ export function translateAndAdaptToEn(text: string, price: string): string {
     [/em boston/gi, 'in Boston'],
     [/em marlborough/gi, 'in Marlborough'],
     [/em worcester/gi, 'in Worcester'],
-    [/por (\$\d+|\d+\s*dólares)/gi, `for only ${price}`],
+    [/por (\$\d+|\d+\s*dólares)/gi, `${price}`],
   ]
 
   for (const [regex, rep] of replacements) {
@@ -631,7 +681,6 @@ export function translateAndAdaptToEn(text: string, price: string): string {
 }
 
 export function generateDynamicCopy(rawInput: string, price: string, objective: string, language: 'pt' | 'en') {
-  const cleanPrice = price ? (price.startsWith('$') ? price : `$${price}`) : '$120'
   const isEn = language === 'en'
   const userText = (rawInput || '').trim()
 
@@ -650,9 +699,8 @@ export function generateDynamicCopy(rawInput: string, price: string, objective: 
 
   if (userText.length > 2) {
     const cleanUserText = userText.replace(/[.!?]+$/, '').trim()
-    const englishTranslated = translateAndAdaptToEn(cleanUserText, cleanPrice)
+    const englishTranslated = translateAndAdaptToEn(cleanUserText, price)
 
-    // Usa o texto do usuário diretamente sem forçar prefixos indesejados
     headlinePt1 = cleanUserText.toUpperCase()
     headlineEn1 = englishTranslated.toUpperCase()
 
@@ -692,8 +740,8 @@ export function generateDynamicCopy(rawInput: string, price: string, objective: 
       badge: isEn ? '1️⃣ Giant Price' : '1️⃣ Preço Gigante',
       headlinePt: headlinePt1,
       headlineEn: headlineEn1,
-      captionPt: `${userText || 'Aproveite nossa condição especial esta semana!'} Atendimento na região de Massachusetts. Agende já o seu horário! 📲`,
-      captionEn: `Special offer available now! Top-rated service in MA. Contact us today to book! 📲`,
+      captionPt: `${userText || 'Aproveite nossa condição especial esta semana!'} Atendimento na região. Agende já o seu horário! 📲`,
+      captionEn: `Special offer available now! Top-rated local service. Contact us today to book! 📲`,
       tagsPt: '#promocao #servicos #boston #massachusetts #brasileirosnoseua',
       tagsEn: '#specialoffer #services #massachusetts #boston #localbusiness',
     },
@@ -704,7 +752,7 @@ export function generateDynamicCopy(rawInput: string, price: string, objective: 
       headlinePt: headlinePt2,
       headlineEn: headlineEn2,
       captionPt: `Confira o resultado do nosso trabalho! ✨ ${userText || 'Qualidade garantida e atendimento rápido.'} Entre em contato conosco.`,
-      captionEn: `Take a look at our results! ✨ ${userText ? translateAndAdaptToEn(userText, cleanPrice) : 'Top rated quality and friendly service.'} Contact us today.`,
+      captionEn: `Take a look at our results! ✨ ${userText ? translateAndAdaptToEn(userText, price) : 'Top rated quality and friendly service.'} Contact us today.`,
       tagsPt: '#qualidade #servicosprofissionais #satisfacao #massachusetts',
       tagsEn: '#qualityservice #toprated #proservice #bostonlocal',
     },
@@ -715,7 +763,7 @@ export function generateDynamicCopy(rawInput: string, price: string, objective: 
       headlinePt: headlinePt3,
       headlineEn: headlineEn3,
       captionPt: `Compromisso e pontualidade com o seu projeto. ${userText || 'Solicite seu orçamento sem compromisso!'} 📲`,
-      captionEn: `Reliable and punctual service. ${userText ? translateAndAdaptToEn(userText, cleanPrice) : 'Get your free estimate today!'} 📲`,
+      captionEn: `Reliable and punctual service. ${userText ? translateAndAdaptToEn(userText, price) : 'Get your free estimate today!'} 📲`,
       tagsPt: '#atendimentovip #pontualidade #satisfacao #massachusetts',
       tagsEn: '#residentialservice #highquality #appointment #localbusiness',
     },
@@ -726,7 +774,7 @@ export function generateDynamicCopy(rawInput: string, price: string, objective: 
       headlinePt: headlinePt4,
       headlineEn: headlineEn4,
       captionPt: `Mais de 100 clientes satisfeitos! ⭐⭐⭐⭐⭐ ${userText || 'Trabalho sério, honesto e com garantia de satisfação.'} Peça já sua cotação.`,
-      captionEn: `Over 100 happy customers! ⭐⭐⭐⭐⭐ ${userText ? translateAndAdaptToEn(userText, cleanPrice) : 'Quality work and total satisfaction guaranteed.'} Get in touch.`,
+      captionEn: `Over 100 happy customers! ⭐⭐⭐⭐⭐ ${userText ? translateAndAdaptToEn(userText, price) : 'Quality work and total satisfaction guaranteed.'} Get in touch.`,
       tagsPt: '#avaliacaopositiva #clientesatisfeito #5estrelas #bostonma',
       tagsEn: '#5starservice #happyclients #proservice #massachusetts',
     },
@@ -737,7 +785,7 @@ export function generateDynamicCopy(rawInput: string, price: string, objective: 
       headlinePt: headlinePt5,
       headlineEn: headlineEn5,
       captionPt: `Para quem busca acabamento impecável e máxima confiança. ✨ ${userText || 'Reserve seu atendimento exclusivo.'}`,
-      captionEn: `For those who demand the finest service and peace of mind. ✨ ${userText ? translateAndAdaptToEn(userText, cleanPrice) : 'Book your appointment today.'}`,
+      captionEn: `For those who demand the finest service and peace of mind. ✨ ${userText ? translateAndAdaptToEn(userText, price) : 'Book your appointment today.'}`,
       tagsPt: '#estilopremier #luxo #qualidadeexclusiva #massachusetts',
       tagsEn: '#luxuryservice #highend #bostonpro #exclusive',
     },
@@ -748,7 +796,7 @@ export function generateDynamicCopy(rawInput: string, price: string, objective: 
       headlinePt: headlinePt6,
       headlineEn: headlineEn6,
       captionPt: `🔥 Corra que restam poucas vagas essa semana! ${userText || 'Preço especial por tempo limitado.'} Mande mensagem agora mesmo! 📲`,
-      captionEn: `🔥 Hurry, limited slots remaining this week! ${userText ? translateAndAdaptToEn(userText, cleanPrice) : 'Special pricing for a short time.'} Message us now! 📲`,
+      captionEn: `🔥 Hurry, limited slots remaining this week! ${userText ? translateAndAdaptToEn(userText, price) : 'Special pricing for a short time.'} Message us now! 📲`,
       tagsPt: '#urgente #ultimasvagas #ofertasemana #bostonma',
       tagsEn: '#limitedtime #hurryup #specialprice #massachusetts',
     },
