@@ -2,14 +2,17 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Check, Sparkles, ZoomIn } from 'lucide-react'
+import { Check, Sparkles, ZoomIn, Edit3, SlidersHorizontal } from 'lucide-react'
 import { useCreatePost } from '@/context/CreatePostContext'
+import { CreativeLiveEditor } from '@/components/creative/CreativeLiveEditor'
+import { TemplateId } from '@/lib/render-creative'
 
 export default function EscolhaPage() {
   const router = useRouter()
   const { state, updateState } = useCreatePost()
   const [selectedId, setSelectedId] = useState<string>(state.selectedTemplate || 'bold-price')
   const [modalImage, setModalImage] = useState<string | null>(null)
+  const [editingOption, setEditingOption] = useState<any | null>(null)
 
   const handleApprove = () => {
     updateState({
@@ -19,22 +22,75 @@ export default function EscolhaPage() {
     router.push('/criar/prontinho')
   }
 
+  const handleOpenEditor = (e: React.MouseEvent, opt: any) => {
+    e.stopPropagation()
+    setEditingOption({
+      id: opt.id,
+      templateId: (opt.id || 'bold-price') as TemplateId,
+      headlinePt: opt.headlinePt,
+      headlineEn: opt.headlineEn,
+      price: state.price || '$120',
+      showPrice: opt.showPrice !== false,
+      ctaTextPt: opt.ctaTextPt,
+      ctaTextEn: opt.ctaTextEn,
+      photoUrl: state.photoUrl || '/sample-sala.jpg',
+      businessName: state.businessName || 'Bella Clean',
+      phone: state.phone || '(508) 555-0142',
+      brandColor: state.brandColor || '#10b981',
+      language: state.language || 'pt',
+    })
+  }
+
+  const handleSaveEditedOption = (updated: any) => {
+    const nextOptions = state.generatedOptions.map((opt) => {
+      if (opt.id === updated.id) {
+        return {
+          ...opt,
+          id: updated.templateId || opt.id,
+          name: updated.templateId || opt.name,
+          headlinePt: updated.headlinePt,
+          headlineEn: updated.headlineEn,
+          showPrice: updated.showPrice,
+          ctaTextPt: updated.ctaTextPt,
+          ctaTextEn: updated.ctaTextEn,
+          previewUrl: updated.previewUrl,
+          previewUrlEn: updated.previewUrlEn,
+          finalUrl: updated.finalUrl,
+          finalUrlEn: updated.finalUrlEn,
+          finalStoryUrl: updated.finalStoryUrl,
+          finalStoryUrlEn: updated.finalStoryUrlEn,
+        }
+      }
+      return opt
+    })
+
+    updateState({
+      generatedOptions: nextOptions,
+      selectedTemplate: updated.templateId || selectedId,
+      price: updated.price || state.price,
+      businessName: updated.businessName || state.businessName,
+      phone: updated.phone || state.phone,
+      brandColor: updated.brandColor || state.brandColor,
+    })
+    setSelectedId(updated.templateId || selectedId)
+  }
+
   return (
     <div className="flex flex-col gap-5 pb-6">
       {/* Título */}
       <div className="text-center">
         <span className="text-xs font-bold uppercase tracking-wider text-amber-400 bg-amber-950/60 border border-amber-800/40 px-3 py-1 rounded-full">
-          3 Opções Prontas
+          Opções Prontas para Você
         </span>
         <h1 className="text-xl font-bold font-display text-white leading-tight mt-2">
           Qual opção você mais gostou?
         </h1>
         <p className="text-xs text-zinc-400 mt-1">
-          Toque para escolher a que vai ser entregue em todos os formatos e idiomas.
+          Toque para escolher ou clique em <b>"Personalizar"</b> para editar 100% dos textos, valor e botões.
         </p>
       </div>
 
-      {/* Lista das 3 Opções Tocáveis */}
+      {/* Lista das Opções Tocáveis */}
       <div className="flex flex-col gap-4">
         {state.generatedOptions.map((opt) => {
           const isSelected = selectedId === opt.id
@@ -52,18 +108,30 @@ export default function EscolhaPage() {
                   : 'bg-zinc-900/90 border-white/10 hover:border-white/20'
               }`}
             >
-              {/* Header do Card com Badge */}
+              {/* Header do Card com Badge e Botão Grande de Edição */}
               <div className="flex items-center justify-between mb-2.5">
                 <span className={`text-xs font-extrabold px-2.5 py-1 rounded-lg ${
                   isSelected ? 'bg-emerald-500 text-white' : 'bg-zinc-800 text-zinc-300'
                 }`}>
-                  {opt.badge}
+                  {opt.badge || opt.name}
                 </span>
 
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                  isSelected ? 'bg-emerald-500 text-white' : 'border border-white/20'
-                }`}>
-                  {isSelected && <Check className="w-4 h-4 stroke-[3]" />}
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={(e) => handleOpenEditor(e, opt)}
+                    className="flex items-center gap-1.5 text-xs font-extrabold text-emerald-300 bg-emerald-950/80 border border-emerald-500/50 px-3 py-1.5 rounded-xl hover:bg-emerald-900 shadow-sm transition-all active:scale-95 touch-target min-h-[36px]"
+                    title="Editar textos, preço e rodapé deste criativo"
+                  >
+                    <SlidersHorizontal className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Personalizar Arte</span>
+                  </button>
+
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                    isSelected ? 'bg-emerald-500 text-white' : 'border border-white/20'
+                  }`}>
+                    {isSelected && <Check className="w-4 h-4 stroke-[3]" />}
+                  </div>
                 </div>
               </div>
 
@@ -122,6 +190,16 @@ export default function EscolhaPage() {
             className="max-w-full max-h-[90vh] rounded-2xl shadow-2xl"
           />
         </div>
+      )}
+
+      {/* Editor ao Vivo */}
+      {editingOption && (
+        <CreativeLiveEditor
+          isOpen={Boolean(editingOption)}
+          initialData={editingOption}
+          onClose={() => setEditingOption(null)}
+          onSave={handleSaveEditedOption}
+        />
       )}
     </div>
   )

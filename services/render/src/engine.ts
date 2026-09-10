@@ -83,7 +83,7 @@ export async function renderJobToSvg(job: RenderJob): Promise<string> {
   })
 
   // Satori JSX -> SVG
-  const svg = await satori(element, {
+  const svg = await satori(element as any, {
     width: size.w,
     height: size.h,
     fonts,

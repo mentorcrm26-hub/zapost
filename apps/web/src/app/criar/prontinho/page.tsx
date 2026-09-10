@@ -2,13 +2,16 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Check, Download, Copy, Share2, Sparkles, ArrowRight, Image as ImageIcon } from 'lucide-react'
+import { Check, Download, Copy, Share2, Sparkles, ArrowRight, Image as ImageIcon, Edit3 } from 'lucide-react'
 import confetti from 'canvas-confetti'
 import { useCreatePost } from '@/context/CreatePostContext'
+import { CreativeLiveEditor } from '@/components/creative/CreativeLiveEditor'
+import { TemplateId } from '@/lib/render-creative'
 
 export default function ProntinhoPage() {
   const { state, updateState } = useCreatePost()
   const [copiedLang, setCopiedLang] = useState<string | null>(null)
+  const [isEditorOpen, setIsEditorOpen] = useState<boolean>(false)
 
   const selectedOpt =
     state.generatedOptions.find((o) => o.id === state.selectedTemplate) ||
@@ -37,10 +40,40 @@ export default function ProntinhoPage() {
     })
   }
 
+  const handleSaveEdited = (updated: any) => {
+    const nextOptions = state.generatedOptions.map((opt) => {
+      if (opt.id === updated.id || opt.id === state.selectedTemplate) {
+        return {
+          ...opt,
+          id: updated.templateId || opt.id,
+          name: updated.templateId || opt.name,
+          headlinePt: updated.headlinePt,
+          headlineEn: updated.headlineEn,
+          previewUrl: updated.previewUrl,
+          previewUrlEn: updated.previewUrlEn,
+          finalUrl: updated.finalUrl,
+          finalUrlEn: updated.finalUrlEn,
+          finalStoryUrl: updated.finalStoryUrl,
+          finalStoryUrlEn: updated.finalStoryUrlEn,
+        }
+      }
+      return opt
+    })
+
+    updateState({
+      generatedOptions: nextOptions,
+      selectedTemplate: updated.templateId || state.selectedTemplate,
+      price: updated.price || state.price,
+      businessName: updated.businessName || state.businessName,
+      phone: updated.phone || state.phone,
+      brandColor: updated.brandColor || state.brandColor,
+    })
+  }
+
   return (
     <div className="flex flex-col gap-5 pb-8">
       {/* Header de Sucesso */}
-      <div className="bg-gradient-to-br from-emerald-900/90 to-teal-950 border border-emerald-500/40 rounded-3xl p-5 text-center shadow-xl">
+      <div className="bg-gradient-to-br from-emerald-900/90 to-teal-950 border border-emerald-500/40 rounded-3xl p-5 text-center shadow-xl relative overflow-hidden">
         <div className="w-16 h-16 rounded-full bg-emerald-500 text-white mx-auto flex items-center justify-center text-3xl shadow-lg mb-3">
           🎉
         </div>
@@ -50,6 +83,18 @@ export default function ProntinhoPage() {
         <p className="text-xs text-emerald-200 mt-1">
           1 crédito debitado • Arquivos em alta resolução liberados sem marca d'água.
         </p>
+
+        {/* Botão de Ajuste Rápido */}
+        <div className="mt-3 flex justify-center">
+          <button
+            type="button"
+            onClick={() => setIsEditorOpen(true)}
+            className="flex items-center gap-1.5 text-xs font-bold text-emerald-300 bg-black/40 border border-emerald-500/30 px-3 py-1.5 rounded-full hover:bg-black/60 transition-colors shadow-sm"
+          >
+            <Edit3 className="w-3.5 h-3.5" />
+            <span>Fazer ajustes rápidos na arte</span>
+          </button>
+        </div>
       </div>
 
       {/* Seção 1: Arquivos para Download */}
@@ -227,6 +272,27 @@ export default function ProntinhoPage() {
         <ImageIcon className="w-4 h-4 text-emerald-400" />
         <span>Ver Todos os Meus Posts</span>
       </Link>
+
+      {/* Editor ao Vivo no Prontinho */}
+      {isEditorOpen && (
+        <CreativeLiveEditor
+          isOpen={isEditorOpen}
+          initialData={{
+            id: selectedOpt.id,
+            templateId: (selectedOpt.id || 'bold-price') as TemplateId,
+            headlinePt: selectedOpt.headlinePt,
+            headlineEn: selectedOpt.headlineEn,
+            price: state.price || '$120',
+            photoUrl: state.photoUrl || '/sample-sala.jpg',
+            businessName: state.businessName || 'Bella Clean',
+            phone: state.phone || '(508) 555-0142',
+            brandColor: state.brandColor || '#10b981',
+            language: state.language || 'pt',
+          }}
+          onClose={() => setIsEditorOpen(false)}
+          onSave={handleSaveEdited}
+        />
+      )}
     </div>
   )
 }

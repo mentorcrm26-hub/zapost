@@ -20,20 +20,24 @@ export default function FazendoPage() {
     async function generateRealCreatives() {
       try {
         const photoUrl = state.photoUrl || '/sample-sala.jpg'
-        const rawInput = state.rawInput || 'Limpeza completa residencial em Framingham por $120'
-        const price = state.price || '120'
+        const rawInput = state.rawInput || 'Divulgação de Serviços'
+        const price = state.price || ''
+        const showPrice = state.objective === 'promocao' && Boolean(price)
         const objective = state.objective || 'promocao'
+        const businessName = state.businessName || 'Bella Clean'
+        const phone = state.phone || '(508) 555-0142'
+        const brandColor = state.brandColor || '#10b981'
 
-        // 1. Gera as cópias personalizadas com base no texto e preço reais
+        // 1. Gera as cópias personalizadas com base no que o usuário digitou
         const dynamicCopies = generateDynamicCopy(rawInput, price, objective, state.language)
 
         setStep(1)
         setProgress(40)
 
-        // 2. Renderiza em tempo real os 3 templates com a foto real do usuário
+        // 2. Renderiza em tempo real os templates com a foto real do usuário
         const generated = await Promise.all(
           dynamicCopies.map(async (copy) => {
-            const templateId = copy.id as 'bold-price' | 'photo-overlay' | 'clean-split'
+            const templateId = copy.id
 
             // Feed PT
             const previewUrl = await renderCreativeCanvas({
@@ -43,9 +47,10 @@ export default function FazendoPage() {
               photoUrl: photoUrl,
               headline: copy.headlinePt,
               price: price,
-              businessName: state.businessName || 'Bella Clean',
-              phone: state.phone || '(508) 555-0142',
-              brandColor: state.brandColor || '#10b981',
+              showPrice: showPrice,
+              businessName: businessName,
+              phone: phone,
+              brandColor: brandColor,
               withWatermark: true,
             })
 
@@ -57,9 +62,10 @@ export default function FazendoPage() {
               photoUrl: photoUrl,
               headline: copy.headlineEn,
               price: price,
-              businessName: state.businessName || 'Bella Clean',
-              phone: state.phone || '(508) 555-0142',
-              brandColor: state.brandColor || '#10b981',
+              showPrice: showPrice,
+              businessName: businessName,
+              phone: phone,
+              brandColor: brandColor,
               withWatermark: true,
             })
 
@@ -71,9 +77,10 @@ export default function FazendoPage() {
               photoUrl: photoUrl,
               headline: copy.headlinePt,
               price: price,
-              businessName: state.businessName || 'Bella Clean',
-              phone: state.phone || '(508) 555-0142',
-              brandColor: state.brandColor || '#10b981',
+              showPrice: showPrice,
+              businessName: businessName,
+              phone: phone,
+              brandColor: brandColor,
               withWatermark: false,
             })
 
@@ -85,9 +92,10 @@ export default function FazendoPage() {
               photoUrl: photoUrl,
               headline: copy.headlineEn,
               price: price,
-              businessName: state.businessName || 'Bella Clean',
-              phone: state.phone || '(508) 555-0142',
-              brandColor: state.brandColor || '#10b981',
+              showPrice: showPrice,
+              businessName: businessName,
+              phone: phone,
+              brandColor: brandColor,
               withWatermark: false,
             })
 
@@ -99,9 +107,10 @@ export default function FazendoPage() {
               photoUrl: photoUrl,
               headline: copy.headlinePt,
               price: price,
-              businessName: state.businessName || 'Bella Clean',
-              phone: state.phone || '(508) 555-0142',
-              brandColor: state.brandColor || '#10b981',
+              showPrice: showPrice,
+              businessName: businessName,
+              phone: phone,
+              brandColor: brandColor,
               withWatermark: false,
             })
 
@@ -113,9 +122,10 @@ export default function FazendoPage() {
               photoUrl: photoUrl,
               headline: copy.headlineEn,
               price: price,
-              businessName: state.businessName || 'Bella Clean',
-              phone: state.phone || '(508) 555-0142',
-              brandColor: state.brandColor || '#10b981',
+              showPrice: showPrice,
+              businessName: businessName,
+              phone: phone,
+              brandColor: brandColor,
               withWatermark: false,
             })
 
@@ -123,6 +133,9 @@ export default function FazendoPage() {
               id: copy.id,
               name: copy.name,
               badge: copy.badge,
+              showPrice: showPrice,
+              ctaTextPt: `💬 Agendamentos & Contato: ${phone}`,
+              ctaTextEn: `📱 Call / Text: ${phone}`,
               previewUrl: previewUrl || copy.id,
               previewUrlEn: previewUrlEn || copy.id,
               finalUrl: finalUrl || previewUrl,
@@ -174,10 +187,10 @@ export default function FazendoPage() {
       {/* Título Principal */}
       <div>
         <h1 className="text-2xl font-bold font-display text-white leading-tight">
-          Tô fazendo, me dá 40 segundos ⏳
+          Tô fazendo, me dá alguns segundos ⏳
         </h1>
         <p className="text-xs text-zinc-400 mt-1.5">
-          Criando headlines magnéticas e renderizando suas 3 opções de arte.
+          Criando artes profissionais e adaptando para o seu negócio.
         </p>
       </div>
 
@@ -198,7 +211,7 @@ export default function FazendoPage() {
             <Loader2 className="w-5 h-5 text-amber-400 animate-spin shrink-0" />
           )}
           <span className={`text-xs ${step >= 1 ? 'font-bold text-zinc-100' : 'text-zinc-500'}`}>
-            1. Analisando foto e extraindo argumentos de venda...
+            1. Analisando foto e textos informados...
           </span>
         </div>
 
@@ -211,7 +224,7 @@ export default function FazendoPage() {
             <div className="w-5 h-5 rounded-full border border-zinc-700 shrink-0" />
           )}
           <span className={`text-xs ${step >= 2 ? 'font-bold text-zinc-100' : 'text-zinc-500'}`}>
-            2. Adaptando copy cultural em Português e Inglês 🇺🇸🇧🇷...
+            2. Adaptando versões em Português e Inglês 🇺🇸🇧🇷...
           </span>
         </div>
 
@@ -222,7 +235,7 @@ export default function FazendoPage() {
             <div className="w-5 h-5 rounded-full border border-zinc-700 shrink-0" />
           )}
           <span className={`text-xs ${step >= 3 ? 'font-bold text-zinc-100' : 'text-zinc-500'}`}>
-            3. Renderizando suas 3 artes com a sua foto e dados...
+            3. Renderizando artes com a sua foto e dados...
           </span>
         </div>
       </div>

@@ -1,16 +1,95 @@
+export type TemplateId =
+  | 'bold-price'
+  | 'photo-overlay'
+  | 'clean-split'
+  | 'proof-card'
+  | 'minimal-luxury'
+  | 'urgent-promo'
+
 export interface RenderCreativeOptions {
-  template: 'bold-price' | 'photo-overlay' | 'clean-split'
+  template: TemplateId | string
   format: 'feed' | 'story'
   language: 'pt' | 'en'
   photoUrl: string
   headline: string
+  subheadline?: string
   caption?: string
-  price: string
+  price?: string
+  showPrice?: boolean
+  ctaText?: string
   businessName?: string
   phone?: string
   brandColor?: string
+  accentColor?: string
   withWatermark?: boolean
 }
+
+export interface TemplateCatalogItem {
+  id: TemplateId
+  name: string
+  badgePt: string
+  badgeEn: string
+  category: 'oferta' | 'prova' | 'institucional' | 'urgencia'
+  descriptionPt: string
+  descriptionEn: string
+}
+
+export const TEMPLATE_CATALOG: TemplateCatalogItem[] = [
+  {
+    id: 'bold-price',
+    name: 'Bold Price',
+    badgePt: '1️⃣ Preço Gigante',
+    badgeEn: '1️⃣ Giant Price',
+    category: 'oferta',
+    descriptionPt: 'Preço em destaque gigante com foto escurecida ao fundo.',
+    descriptionEn: 'Massive price tag with dimmed background photo.',
+  },
+  {
+    id: 'photo-overlay',
+    name: 'Photo Spotlight',
+    badgePt: '2️⃣ Foto em Destaque',
+    badgeEn: '2️⃣ Photo Spotlight',
+    category: 'institucional',
+    descriptionPt: 'A foto do seu trabalho ocupa toda a arte com gradiente no rodapé.',
+    descriptionEn: 'Full photo showcase with smooth gradient on bottom.',
+  },
+  {
+    id: 'clean-split',
+    name: 'Clean Split',
+    badgePt: '3️⃣ Divisão Limpa',
+    badgeEn: '3️⃣ Clean Split',
+    category: 'institucional',
+    descriptionPt: 'Foto em moldura superior e dados da oferta na metade inferior.',
+    descriptionEn: 'Framed photo at top with offer details on bottom.',
+  },
+  {
+    id: 'proof-card',
+    name: '5-Star Proof',
+    badgePt: '4️⃣ Prova Social 5★',
+    badgeEn: '4️⃣ 5-Star Social Proof',
+    category: 'prova',
+    descriptionPt: 'Avaliação 5 estrelas e selo de garantia de satisfação.',
+    descriptionEn: '5-star customer review rating and satisfaction badge.',
+  },
+  {
+    id: 'minimal-luxury',
+    name: 'Minimal Luxury',
+    badgePt: '5️⃣ Minimalista Luxo',
+    badgeEn: '5️⃣ Minimal Luxury',
+    category: 'institucional',
+    descriptionPt: 'Design editorial refinado com bordas finas e alta elegância.',
+    descriptionEn: 'Refined editorial styling with subtle borders & clean elegance.',
+  },
+  {
+    id: 'urgent-promo',
+    name: 'Urgent Promo',
+    badgePt: '6️⃣ Urgência & Vagas',
+    badgeEn: '6️⃣ Urgent Promo',
+    category: 'urgencia',
+    descriptionPt: 'Faixa de urgência, vagas limitadas e chamada para ação rápida.',
+    descriptionEn: 'Limited slots banner, countdown vibe and strong CTA.',
+  },
+]
 
 // Helper para quebrar texto em várias linhas no canvas
 function wrapText(
@@ -51,7 +130,6 @@ function wrapText(
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve) => {
     const img = new Image()
-    // Somente adiciona crossOrigin se for URL HTTP/HTTPS externa para não quebrar data: ou blob:
     if (src.startsWith('http://') || src.startsWith('https://')) {
       img.crossOrigin = 'anonymous'
     }
@@ -59,11 +137,9 @@ function loadImage(src: string): Promise<HTMLImageElement> {
     img.onload = () => resolve(img)
 
     img.onerror = () => {
-      // Se falhar com crossOrigin, tenta sem crossOrigin
       const retry = new Image()
       retry.onload = () => resolve(retry)
       retry.onerror = () => {
-        // Fallback elegante com gradiente escuro se a imagem falhar
         const fallbackCanvas = document.createElement('canvas')
         fallbackCanvas.width = 400
         fallbackCanvas.height = 400
@@ -100,15 +176,26 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
   const isEn = options.language === 'en'
   const businessName = options.businessName || 'BELLA CLEAN'
   const phone = options.phone || '(508) 555-0142'
-  const price = options.price ? (options.price.startsWith('$') ? options.price : `$${options.price}`) : '$120'
+  const rawPrice = options.price ? options.price.trim() : ''
+  const hasPrice = options.showPrice !== false && rawPrice.length > 0
+  const price = hasPrice ? (rawPrice.startsWith('$') ? rawPrice : `$${rawPrice}`) : ''
+  
   const brandColor = options.brandColor || '#10b981'
+  const accentColor = options.accentColor || '#f59e0b'
 
-  // Carrega a foto real do usuário (seja base64, blob ou URL)
+  // Texto do botão de rodapé customizado
+  const defaultCtaText = isEn
+    ? `📱 Call / Text: ${phone}`
+    : `💬 Agendamentos & Contato: ${phone}`
+  const footerButtonText = options.ctaText && options.ctaText.trim().length > 0
+    ? options.ctaText.trim()
+    : defaultCtaText
+
+  // Carrega a foto real do usuário
   const img = await loadImage(options.photoUrl || '/sample-sala.jpg')
 
-  if (options.template === 'bold-price') {
-    // ==================== TEMPLATE 1: BOLD PRICE ====================
-    // 1. Foto de fundo preenchendo a tela
+  // Helper de desenho da foto em tela cheia com cover
+  const drawCoverImage = () => {
     const imgAspect = img.width / img.height
     const canvasAspect = width / height
     let drawW = width
@@ -123,10 +210,13 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
       drawH = width / imgAspect
       offsetY = (height - drawH) / 2
     }
-
     ctx.drawImage(img, offsetX, offsetY, drawW, drawH)
+  }
 
-    // 2. Gradientes de escurecimento para contraste profissional
+  if (options.template === 'bold-price') {
+    // ==================== TEMPLATE 1: BOLD PRICE ====================
+    drawCoverImage()
+
     const grad = ctx.createLinearGradient(0, 0, 0, height)
     grad.addColorStop(0, 'rgba(11, 15, 23, 0.88)')
     grad.addColorStop(0.35, 'rgba(11, 15, 23, 0.45)')
@@ -135,7 +225,7 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
     ctx.fillStyle = grad
     ctx.fillRect(0, 0, width, height)
 
-    // 3. Topo: Nome da Marca
+    // Topo: Nome da Marca / Profissional
     ctx.fillStyle = '#ffffff'
     ctx.font = 'bold 36px sans-serif'
     ctx.textAlign = 'center'
@@ -143,62 +233,55 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
 
     ctx.fillStyle = brandColor
     ctx.font = 'bold 22px sans-serif'
-    ctx.fillText(isEn ? 'SPECIAL LIMITED OFFER' : 'OFERTA ESPECIAL DA SEMANA', width / 2, isStory ? 230 : 145)
+    ctx.fillText(isEn ? 'SPECIAL OFFER' : 'OFERTA ESPECIAL', width / 2, isStory ? 230 : 145)
 
-    // 4. Centro: Badge Gigante de Preço
-    const badgeY = isStory ? height / 2 - 120 : height / 2 - 60
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.8)'
-    ctx.beginPath()
-    ctx.roundRect(width / 2 - 280, badgeY - 110, 560, 220, 36)
-    ctx.fill()
-    ctx.lineWidth = 6
-    ctx.strokeStyle = brandColor
-    ctx.stroke()
+    // Centro: Badge de Preço (somente se showPrice estiver ativo)
+    if (hasPrice) {
+      const badgeY = isStory ? height / 2 - 120 : height / 2 - 60
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.82)'
+      ctx.beginPath()
+      ctx.roundRect(width / 2 - 280, badgeY - 110, 560, 220, 36)
+      ctx.fill()
+      ctx.lineWidth = 6
+      ctx.strokeStyle = brandColor
+      ctx.stroke()
 
-    ctx.fillStyle = '#ffffff'
-    ctx.font = 'bold 26px sans-serif'
-    ctx.fillText(isEn ? 'STARTING AT ONLY' : 'A PARTIR DE APENAS', width / 2, badgeY - 45)
+      ctx.fillStyle = '#ffffff'
+      ctx.font = 'bold 26px sans-serif'
+      ctx.fillText(isEn ? 'STARTING AT ONLY' : 'A PARTIR DE APENAS', width / 2, badgeY - 45)
 
-    ctx.fillStyle = '#f59e0b'
-    ctx.font = '900 110px sans-serif'
-    ctx.fillText(price, width / 2, badgeY + 60)
+      ctx.fillStyle = accentColor
+      ctx.font = '900 110px sans-serif'
+      ctx.fillText(price, width / 2, badgeY + 60)
 
-    // 5. Headline da Oferta
-    ctx.fillStyle = '#ffffff'
-    ctx.font = 'bold 44px sans-serif'
-    const headlineY = isStory ? height / 2 + 220 : height / 2 + 200
-    wrapText(ctx, options.headline.toUpperCase(), width / 2, headlineY, 860, 56, 3)
+      // Headline abaixo do preço
+      ctx.fillStyle = '#ffffff'
+      ctx.font = 'bold 44px sans-serif'
+      const headlineY = isStory ? height / 2 + 220 : height / 2 + 200
+      wrapText(ctx, options.headline.toUpperCase(), width / 2, headlineY, 860, 56, 3)
+    } else {
+      // Sem preço: Headline centralizada e imponente
+      ctx.fillStyle = '#ffffff'
+      ctx.font = 'bold 54px sans-serif'
+      const headlineY = isStory ? height / 2 - 40 : height / 2 - 30
+      wrapText(ctx, options.headline.toUpperCase(), width / 2, headlineY, 920, 68, 4)
+    }
 
-    // 6. Rodapé: Chamada de Contato
+    // Rodapé com texto editável
     const footerY = isStory ? height - 160 : height - 100
-    ctx.fillStyle = '#10b981'
+    ctx.fillStyle = brandColor
     ctx.beginPath()
-    ctx.roundRect(width / 2 - 360, footerY - 55, 720, 90, 45)
+    ctx.roundRect(width / 2 - 380, footerY - 55, 760, 90, 45)
     ctx.fill()
 
     ctx.fillStyle = '#052e16'
-    ctx.font = 'bold 34px sans-serif'
-    ctx.fillText(`📱 ${isEn ? 'Call / Text' : 'Contato & Agendamento'}: ${phone}`, width / 2, footerY + 5)
+    ctx.font = 'bold 32px sans-serif'
+    ctx.textAlign = 'center'
+    ctx.fillText(footerButtonText, width / 2, footerY + 5)
   } else if (options.template === 'photo-overlay') {
     // ==================== TEMPLATE 2: PHOTO OVERLAY ====================
-    // 1. Foto ocupando tudo
-    const imgAspect = img.width / img.height
-    const canvasAspect = width / height
-    let drawW = width
-    let drawH = height
-    let offsetX = 0
-    let offsetY = 0
+    drawCoverImage()
 
-    if (imgAspect > canvasAspect) {
-      drawW = height * imgAspect
-      offsetX = (width - drawW) / 2
-    } else {
-      drawH = width / imgAspect
-      offsetY = (height - drawH) / 2
-    }
-    ctx.drawImage(img, offsetX, offsetY, drawW, drawH)
-
-    // 2. Gradiente escuro focado no terço inferior
     const grad = ctx.createLinearGradient(0, height * 0.35, 0, height)
     grad.addColorStop(0, 'transparent')
     grad.addColorStop(0.45, 'rgba(11, 15, 23, 0.85)')
@@ -206,21 +289,23 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
     ctx.fillStyle = grad
     ctx.fillRect(0, height * 0.35, width, height * 0.65)
 
-    // 3. Badge flutuante de preço no canto superior direito
-    ctx.fillStyle = 'rgba(15, 46, 42, 0.92)'
-    ctx.beginPath()
-    ctx.roundRect(width - 320, isStory ? 140 : 60, 260, 100, 24)
-    ctx.fill()
-    ctx.lineWidth = 4
-    ctx.strokeStyle = '#f59e0b'
-    ctx.stroke()
+    // Badge flutuante de preço (se ativo)
+    if (hasPrice) {
+      ctx.fillStyle = 'rgba(15, 46, 42, 0.92)'
+      ctx.beginPath()
+      ctx.roundRect(width - 320, isStory ? 140 : 60, 260, 100, 24)
+      ctx.fill()
+      ctx.lineWidth = 4
+      ctx.strokeStyle = accentColor
+      ctx.stroke()
 
-    ctx.fillStyle = '#f59e0b'
-    ctx.font = '900 52px sans-serif'
-    ctx.textAlign = 'center'
-    ctx.fillText(price, width - 190, isStory ? 212 : 132)
+      ctx.fillStyle = accentColor
+      ctx.font = '900 52px sans-serif'
+      ctx.textAlign = 'center'
+      ctx.fillText(price, width - 190, isStory ? 212 : 132)
+    }
 
-    // 4. Card de Conteúdo Inferior
+    // Card de Conteúdo Inferior
     ctx.textAlign = 'left'
     ctx.fillStyle = brandColor
     ctx.font = 'bold 28px sans-serif'
@@ -231,7 +316,7 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
     ctx.font = 'bold 46px sans-serif'
     wrapText(ctx, options.headline, 80, contentY + 65, 920, 60, 3)
 
-    // 5. Botão de Contato no rodapé
+    // Rodapé com texto editável
     const footerY = isStory ? height - 160 : height - 100
     ctx.fillStyle = '#10b981'
     ctx.beginPath()
@@ -239,16 +324,14 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
     ctx.fill()
 
     ctx.fillStyle = '#052e16'
-    ctx.font = 'bold 34px sans-serif'
+    ctx.font = 'bold 32px sans-serif'
     ctx.textAlign = 'center'
-    ctx.fillText(`💬 ${isEn ? 'Appointments' : 'Agendamentos & Contato'}: ${phone}`, width / 2, footerY + 7)
-  } else {
+    ctx.fillText(footerButtonText, width / 2, footerY + 7)
+  } else if (options.template === 'clean-split') {
     // ==================== TEMPLATE 3: CLEAN SPLIT ====================
-    // 1. Fundo sólido profundo
     ctx.fillStyle = '#0b0f17'
     ctx.fillRect(0, 0, width, height)
 
-    // 2. Metade Superior: Foto do usuário em moldura moderna
     const photoH = isStory ? height * 0.52 : height * 0.55
     const margin = 50
     const photoW = width - margin * 2
@@ -258,7 +341,6 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
     ctx.roundRect(margin, margin + (isStory ? 80 : 20), photoW, photoH - 60, 36)
     ctx.clip()
 
-    // Desenha foto cortada
     const imgAspect = img.width / img.height
     const boxAspect = photoW / (photoH - 60)
     let dW = photoW
@@ -276,35 +358,31 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
     ctx.drawImage(img, ox, oy, dW, dH)
     ctx.restore()
 
-    // Borda da foto
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)'
     ctx.lineWidth = 4
     ctx.beginPath()
     ctx.roundRect(margin, margin + (isStory ? 80 : 20), photoW, photoH - 60, 36)
     ctx.stroke()
 
-    // 3. Metade Inferior: Informações, Preço e Chamada
     const bottomStartY = photoH + (isStory ? 100 : 40)
 
-    // Tag da Marca
     ctx.fillStyle = brandColor
     ctx.font = 'bold 26px sans-serif'
     ctx.textAlign = 'left'
     ctx.fillText(`🏆 ${businessName.toUpperCase()}`, margin, bottomStartY)
 
-    // Preço alinhado à direita
-    ctx.fillStyle = '#f59e0b'
-    ctx.font = '900 48px sans-serif'
-    ctx.textAlign = 'right'
-    ctx.fillText(price, width - margin, bottomStartY)
+    if (hasPrice) {
+      ctx.fillStyle = accentColor
+      ctx.font = '900 48px sans-serif'
+      ctx.textAlign = 'right'
+      ctx.fillText(price, width - margin, bottomStartY)
+    }
 
-    // Headline
     ctx.fillStyle = '#ffffff'
     ctx.font = 'bold 44px sans-serif'
     ctx.textAlign = 'left'
     wrapText(ctx, options.headline, margin, bottomStartY + 65, photoW, 58, 3)
 
-    // Botão de Contato
     const footerY = isStory ? height - 160 : height - 90
     ctx.fillStyle = '#25D366'
     ctx.beginPath()
@@ -314,10 +392,192 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
     ctx.fillStyle = '#052e16'
     ctx.font = 'bold 32px sans-serif'
     ctx.textAlign = 'center'
-    ctx.fillText(`📲 ${isEn ? 'Appointments' : 'Agendamentos'}: ${phone}`, width / 2, footerY + 6)
+    ctx.fillText(footerButtonText, width / 2, footerY + 6)
+  } else if (options.template === 'proof-card') {
+    // ==================== TEMPLATE 4: PROOF CARD (5 ESTRELAS) ====================
+    drawCoverImage()
+
+    const grad = ctx.createLinearGradient(0, 0, 0, height)
+    grad.addColorStop(0, 'rgba(8, 24, 21, 0.90)')
+    grad.addColorStop(0.4, 'rgba(11, 15, 23, 0.65)')
+    grad.addColorStop(0.7, 'rgba(11, 15, 23, 0.92)')
+    grad.addColorStop(1, 'rgba(8, 24, 21, 0.98)')
+    ctx.fillStyle = grad
+    ctx.fillRect(0, 0, width, height)
+
+    ctx.textAlign = 'center'
+    ctx.fillStyle = '#ffffff'
+    ctx.font = 'bold 32px sans-serif'
+    ctx.fillText(`✨ ${businessName.toUpperCase()}`, width / 2, isStory ? 160 : 80)
+
+    const cardY = isStory ? height / 2 - 160 : height / 2 - 110
+    const cardW = 920
+    const cardH = isStory ? 580 : 500
+    const cardX = (width - cardW) / 2
+
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.85)'
+    ctx.beginPath()
+    ctx.roundRect(cardX, cardY, cardW, cardH, 36)
+    ctx.fill()
+    ctx.lineWidth = 3
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)'
+    ctx.stroke()
+
+    ctx.fillStyle = '#fbbf24'
+    ctx.font = '48px sans-serif'
+    ctx.fillText('★★★★★', width / 2, cardY + 70)
+
+    ctx.fillStyle = '#94a3b8'
+    ctx.font = 'bold 20px sans-serif'
+    ctx.fillText(isEn ? '5.0 RATED BY 100+ CLIENTS' : 'AVALIAÇÃO 5.0 • 100% SATISFAÇÃO', width / 2, cardY + 115)
+
+    ctx.fillStyle = '#ffffff'
+    ctx.font = 'bold 44px sans-serif'
+    wrapText(ctx, `“${options.headline}”`, width / 2, cardY + 190, 820, 56, 3)
+
+    if (hasPrice) {
+      ctx.fillStyle = accentColor
+      ctx.font = '900 64px sans-serif'
+      ctx.fillText(price, width / 2, cardY + (isStory ? 430 : 380))
+    }
+
+    ctx.fillStyle = '#10b981'
+    ctx.font = 'bold 22px sans-serif'
+    ctx.fillText(isEn ? '🛡️ 100% Satisfaction Guaranteed' : '🛡️ Garantia de Excelência & Pontualidade', width / 2, cardY + (hasPrice ? (isStory ? 480 : 430) : (isStory ? 400 : 350)))
+
+    const footerY = isStory ? height - 160 : height - 90
+    ctx.fillStyle = '#10b981'
+    ctx.beginPath()
+    ctx.roundRect(cardX, footerY - 50, cardW, 85, 24)
+    ctx.fill()
+
+    ctx.fillStyle = '#052e16'
+    ctx.font = 'bold 32px sans-serif'
+    ctx.fillText(footerButtonText, width / 2, footerY + 6)
+  } else if (options.template === 'minimal-luxury') {
+    // ==================== TEMPLATE 5: MINIMAL LUXURY ====================
+    ctx.fillStyle = '#08080a'
+    ctx.fillRect(0, 0, width, height)
+
+    const pad = 40
+    ctx.strokeStyle = 'rgba(212, 175, 55, 0.45)'
+    ctx.lineWidth = 2
+    ctx.strokeRect(pad, pad, width - pad * 2, height - pad * 2)
+
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)'
+    ctx.lineWidth = 1
+    ctx.strokeRect(pad + 12, pad + 12, width - (pad + 12) * 2, height - (pad + 12) * 2)
+
+    ctx.textAlign = 'center'
+    ctx.fillStyle = '#d4af37'
+    ctx.font = 'bold 20px serif'
+    ctx.fillText(`— ${businessName.toUpperCase()} —`, width / 2, isStory ? 140 : 100)
+
+    ctx.fillStyle = '#ffffff'
+    ctx.font = '300 16px sans-serif'
+    ctx.fillText(isEn ? 'PREMIUM & RELIABLE SERVICE' : 'SERVIÇO PREMIUM & EXCLUSIVO', width / 2, isStory ? 180 : 135)
+
+    const photoSize = isStory ? 600 : 480
+    const photoY = isStory ? 240 : 180
+    const photoX = (width - photoSize) / 2
+
+    ctx.save()
+    ctx.beginPath()
+    ctx.roundRect(photoX, photoY, photoSize, photoSize, 28)
+    ctx.clip()
+
+    const imgAspect = img.width / img.height
+    let dW = photoSize
+    let dH = photoSize
+    let ox = photoX
+    let oy = photoY
+
+    if (imgAspect > 1) {
+      dW = photoSize * imgAspect
+      ox = photoX + (photoSize - dW) / 2
+    } else {
+      dH = photoSize / imgAspect
+      oy = photoY + (photoSize - dH) / 2
+    }
+    ctx.drawImage(img, ox, oy, dW, dH)
+    ctx.restore()
+
+    ctx.strokeStyle = '#d4af37'
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    ctx.roundRect(photoX, photoY, photoSize, photoSize, 28)
+    ctx.stroke()
+
+    const contentStartY = photoY + photoSize + (isStory ? 70 : 45)
+    ctx.fillStyle = '#ffffff'
+    ctx.font = 'bold 38px serif'
+    wrapText(ctx, options.headline, width / 2, contentStartY, 880, 50, 2)
+
+    if (hasPrice) {
+      ctx.fillStyle = '#d4af37'
+      ctx.font = 'bold 50px sans-serif'
+      ctx.fillText(price, width / 2, contentStartY + (isStory ? 140 : 110))
+    }
+
+    const footerY = isStory ? height - 140 : height - 85
+    ctx.fillStyle = '#d4af37'
+    ctx.font = 'bold 24px sans-serif'
+    ctx.fillText(footerButtonText, width / 2, footerY)
+  } else if (options.template === 'urgent-promo') {
+    // ==================== TEMPLATE 6: URGENT PROMO (URGÊNCIA & FLASH SALE) ====================
+    drawCoverImage()
+
+    const grad = ctx.createLinearGradient(0, 0, 0, height)
+    grad.addColorStop(0, 'rgba(15, 23, 42, 0.95)')
+    grad.addColorStop(0.3, 'rgba(15, 23, 42, 0.65)')
+    grad.addColorStop(0.7, 'rgba(15, 23, 42, 0.92)')
+    grad.addColorStop(1, 'rgba(2, 6, 23, 0.98)')
+    ctx.fillStyle = grad
+    ctx.fillRect(0, 0, width, height)
+
+    ctx.fillStyle = '#dc2626'
+    ctx.fillRect(0, isStory ? 80 : 30, width, 70)
+
+    ctx.fillStyle = '#ffffff'
+    ctx.font = '900 28px sans-serif'
+    ctx.textAlign = 'center'
+    ctx.fillText(isEn ? '🔥 LIMITED TIME OFFER • ONLY THIS WEEK' : '🔥 ÚLTIMAS VAGAS • SOMENTE ESSA SEMANA', width / 2, isStory ? 125 : 75)
+
+    ctx.fillStyle = '#e2e8f0'
+    ctx.font = 'bold 32px sans-serif'
+    ctx.fillText(businessName.toUpperCase(), width / 2, isStory ? 220 : 155)
+
+    ctx.fillStyle = '#ffffff'
+    ctx.font = '900 48px sans-serif'
+    const headlineY = isStory ? height / 2 - 80 : height / 2 - 30
+    wrapText(ctx, options.headline.toUpperCase(), width / 2, headlineY, 920, 60, 3)
+
+    if (hasPrice) {
+      const badgeY = isStory ? height / 2 + 180 : height / 2 + 160
+      ctx.fillStyle = '#f59e0b'
+      ctx.beginPath()
+      ctx.roundRect(width / 2 - 260, badgeY - 70, 520, 140, 28)
+      ctx.fill()
+
+      ctx.fillStyle = '#0f172a'
+      ctx.font = '900 80px sans-serif'
+      ctx.fillText(price, width / 2, badgeY + 30)
+    }
+
+    const footerY = isStory ? height - 160 : height - 90
+    ctx.fillStyle = '#10b981'
+    ctx.beginPath()
+    ctx.roundRect(width / 2 - 380, footerY - 55, 760, 95, 48)
+    ctx.fill()
+    ctx.lineWidth = 4
+    ctx.strokeStyle = '#34d399'
+    ctx.stroke()
+
+    ctx.fillStyle = '#052e16'
+    ctx.font = '900 34px sans-serif'
+    ctx.fillText(footerButtonText, width / 2, footerY + 8)
   }
 
-  // 7. Marca d'água opcional se preview
   if (options.withWatermark) {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.65)'
     ctx.beginPath()
@@ -334,14 +594,12 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
 }
 
 // Dicionário e gerador dinâmico de cópias fiéis ao input do usuário
-function translateAndAdaptToEn(text: string, price: string): string {
+export function translateAndAdaptToEn(text: string, price: string): string {
   if (!text) return `Special Offer for only ${price}!`
   let t = text.trim()
   
-  // Limpeza de prefixos comuns em português
   t = t.replace(/^(eu quero divulgar|divulga|post sobre|estou fazendo|faço|ofereço)\s+/i, '')
   
-  // Substituições de termos para inglês fluente
   const replacements: Array<[RegExp, string]> = [
     [/limpeza de casa|faxina residencial|limpeza residencial/gi, 'House Cleaning'],
     [/limpeza comercial|limpeza de escritório/gi, 'Commercial & Office Cleaning'],
@@ -375,48 +633,63 @@ function translateAndAdaptToEn(text: string, price: string): string {
 export function generateDynamicCopy(rawInput: string, price: string, objective: string, language: 'pt' | 'en') {
   const cleanPrice = price ? (price.startsWith('$') ? price : `$${price}`) : '$120'
   const isEn = language === 'en'
-
   const userText = (rawInput || '').trim()
 
-  // Se o usuário digitou algo real, priorizamos 100% o que ele digitou
   let headlinePt1 = ''
   let headlineEn1 = ''
   let headlinePt2 = ''
   let headlineEn2 = ''
   let headlinePt3 = ''
   let headlineEn3 = ''
+  let headlinePt4 = ''
+  let headlineEn4 = ''
+  let headlinePt5 = ''
+  let headlineEn5 = ''
+  let headlinePt6 = ''
+  let headlineEn6 = ''
 
-  if (userText.length > 3) {
-    // Limpa pontuações extras
-    const cleanUserText = userText.replace(/[.!?]+$/, '')
+  if (userText.length > 2) {
+    const cleanUserText = userText.replace(/[.!?]+$/, '').trim()
     const englishTranslated = translateAndAdaptToEn(cleanUserText, cleanPrice)
 
-    // 1. Ângulo Direto & Oferta
-    headlinePt1 = `${cleanUserText.toUpperCase()} • ${cleanPrice}!`
-    headlineEn1 = `${englishTranslated.toUpperCase()} • ONLY ${cleanPrice}!`
+    // Usa o texto do usuário diretamente sem forçar prefixos indesejados
+    headlinePt1 = cleanUserText.toUpperCase()
+    headlineEn1 = englishTranslated.toUpperCase()
 
-    // 2. Ângulo Promessa & Benefício
-    headlinePt2 = `O MELHOR EM ${cleanUserText.toUpperCase()}`
-    headlineEn2 = `TOP QUALITY ${englishTranslated.toUpperCase()}`
+    headlinePt2 = cleanUserText.toUpperCase()
+    headlineEn2 = englishTranslated.toUpperCase()
 
-    // 3. Ângulo Confiança & Chamada
-    headlinePt3 = `${cleanUserText.toUpperCase()} COM GARANTIA`
-    headlineEn3 = `RELIABLE ${englishTranslated.toUpperCase()}`
+    headlinePt3 = cleanUserText.toUpperCase()
+    headlineEn3 = englishTranslated.toUpperCase()
+
+    headlinePt4 = cleanUserText.toUpperCase()
+    headlineEn4 = englishTranslated.toUpperCase()
+
+    headlinePt5 = cleanUserText.toUpperCase()
+    headlineEn5 = englishTranslated.toUpperCase()
+
+    headlinePt6 = cleanUserText.toUpperCase()
+    headlineEn6 = englishTranslated.toUpperCase()
   } else {
-    // Fallback somente se não digitou absolutamente nada
-    headlinePt1 = `OFERTA ESPECIAL POR APENAS ${cleanPrice}!`
-    headlineEn1 = `SPECIAL OFFER: ONLY ${cleanPrice} THIS WEEK!`
-    headlinePt2 = `SERVIÇO PROFISSIONAL DE QUALIDADE`
-    headlineEn2 = `TOP-RATED PROFESSIONAL SERVICE`
-    headlinePt3 = `AGENDAMENTO RÁPIDO POR ${cleanPrice}`
-    headlineEn3 = `QUICK APPOINTMENT FOR ${cleanPrice}`
+    headlinePt1 = `OFERTA ESPECIAL`
+    headlineEn1 = `SPECIAL OFFER`
+    headlinePt2 = `SERVIÇO PROFISSIONAL`
+    headlineEn2 = `TOP-RATED SERVICE`
+    headlinePt3 = `ATENDIMENTO & QUALIDADE`
+    headlineEn3 = `RELIABLE SERVICE`
+    headlinePt4 = `QUALIDADE COMPROVADA`
+    headlineEn4 = `PROVEN QUALITY`
+    headlinePt5 = `EXPERIÊNCIA & EXCLUSIVIDADE`
+    headlineEn5 = `PREMIUM EXPERIENCE`
+    headlinePt6 = `GARANTA SEU HORÁRIO`
+    headlineEn6 = `BOOK YOUR SPOT TODAY`
   }
 
   return [
     {
-      id: 'bold-price',
+      id: 'bold-price' as TemplateId,
       name: 'Bold Price',
-      badge: isEn ? '1️⃣ Option 1: Giant Price' : '1️⃣ Opção 1: Preço Gigante',
+      badge: isEn ? '1️⃣ Giant Price' : '1️⃣ Preço Gigante',
       headlinePt: headlinePt1,
       headlineEn: headlineEn1,
       captionPt: `${userText || 'Aproveite nossa condição especial esta semana!'} Atendimento na região de Massachusetts. Agende já o seu horário! 📲`,
@@ -425,9 +698,9 @@ export function generateDynamicCopy(rawInput: string, price: string, objective: 
       tagsEn: '#specialoffer #services #massachusetts #boston #localbusiness',
     },
     {
-      id: 'photo-overlay',
-      name: 'Photo Overlay',
-      badge: isEn ? '2️⃣ Option 2: Photo Spotlight' : '2️⃣ Opção 2: Foto c/ Gradiente',
+      id: 'photo-overlay' as TemplateId,
+      name: 'Photo Spotlight',
+      badge: isEn ? '2️⃣ Photo Spotlight' : '2️⃣ Foto em Destaque',
       headlinePt: headlinePt2,
       headlineEn: headlineEn2,
       captionPt: `Confira o resultado do nosso trabalho! ✨ ${userText || 'Qualidade garantida e atendimento rápido.'} Entre em contato conosco.`,
@@ -436,9 +709,9 @@ export function generateDynamicCopy(rawInput: string, price: string, objective: 
       tagsEn: '#qualityservice #toprated #proservice #bostonlocal',
     },
     {
-      id: 'clean-split',
+      id: 'clean-split' as TemplateId,
       name: 'Clean Split',
-      badge: isEn ? '3️⃣ Option 3: Clean Split' : '3️⃣ Opção 3: Divisão Limpa',
+      badge: isEn ? '3️⃣ Clean Split' : '3️⃣ Divisão Limpa',
       headlinePt: headlinePt3,
       headlineEn: headlineEn3,
       captionPt: `Compromisso e pontualidade com o seu projeto. ${userText || 'Solicite seu orçamento sem compromisso!'} 📲`,
@@ -446,6 +719,38 @@ export function generateDynamicCopy(rawInput: string, price: string, objective: 
       tagsPt: '#atendimentovip #pontualidade #satisfacao #massachusetts',
       tagsEn: '#residentialservice #highquality #appointment #localbusiness',
     },
+    {
+      id: 'proof-card' as TemplateId,
+      name: '5-Star Proof',
+      badge: isEn ? '4️⃣ 5-Star Social Proof' : '4️⃣ Prova Social 5★',
+      headlinePt: headlinePt4,
+      headlineEn: headlineEn4,
+      captionPt: `Mais de 100 clientes satisfeitos! ⭐⭐⭐⭐⭐ ${userText || 'Trabalho sério, honesto e com garantia de satisfação.'} Peça já sua cotação.`,
+      captionEn: `Over 100 happy customers! ⭐⭐⭐⭐⭐ ${userText ? translateAndAdaptToEn(userText, cleanPrice) : 'Quality work and total satisfaction guaranteed.'} Get in touch.`,
+      tagsPt: '#avaliacaopositiva #clientesatisfeito #5estrelas #bostonma',
+      tagsEn: '#5starservice #happyclients #proservice #massachusetts',
+    },
+    {
+      id: 'minimal-luxury' as TemplateId,
+      name: 'Minimal Luxury',
+      badge: isEn ? '5️⃣ Minimal Luxury' : '5️⃣ Minimalista Luxo',
+      headlinePt: headlinePt5,
+      headlineEn: headlineEn5,
+      captionPt: `Para quem busca acabamento impecável e máxima confiança. ✨ ${userText || 'Reserve seu atendimento exclusivo.'}`,
+      captionEn: `For those who demand the finest service and peace of mind. ✨ ${userText ? translateAndAdaptToEn(userText, cleanPrice) : 'Book your appointment today.'}`,
+      tagsPt: '#estilopremier #luxo #qualidadeexclusiva #massachusetts',
+      tagsEn: '#luxuryservice #highend #bostonpro #exclusive',
+    },
+    {
+      id: 'urgent-promo' as TemplateId,
+      name: 'Urgent Promo',
+      badge: isEn ? '6️⃣ Urgent Promo' : '6️⃣ Urgência & Vagas',
+      headlinePt: headlinePt6,
+      headlineEn: headlineEn6,
+      captionPt: `🔥 Corra que restam poucas vagas essa semana! ${userText || 'Preço especial por tempo limitado.'} Mande mensagem agora mesmo! 📲`,
+      captionEn: `🔥 Hurry, limited slots remaining this week! ${userText ? translateAndAdaptToEn(userText, cleanPrice) : 'Special pricing for a short time.'} Message us now! 📲`,
+      tagsPt: '#urgente #ultimasvagas #ofertasemana #bostonma',
+      tagsEn: '#limitedtime #hurryup #specialprice #massachusetts',
+    },
   ]
 }
-
