@@ -11,11 +11,30 @@ export interface RenderCreativeOptions {
   format: 'feed' | 'story'
   language: 'pt' | 'en'
   photoUrl: string
-  photoOffsetX?: number // Deslocamento X da foto em % (-50 a +50)
-  photoOffsetY?: number // Deslocamento Y da foto em % (-50 a +50)
-  photoScale?: number   // Escala / Zoom da foto (1.0 a 2.5)
-  textOffsetX?: number  // Deslocamento X dos textos em % (-40 a +40)
-  textOffsetY?: number  // Deslocamento Y dos textos em % (-40 a +40)
+  photoOffsetX?: number // Deslocamento X da foto em % (-100 a +100)
+  photoOffsetY?: number // Deslocamento Y da foto em % (-100 a +100)
+  photoScale?: number   // Escala / Zoom da foto (0.5 a 3.0)
+
+  // Deslocamento global (compatibilidade)
+  textOffsetX?: number
+  textOffsetY?: number
+
+  // Deslocamento e escala INDIVIDUAL de cada elemento (estilo Canva):
+  headlineOffsetX?: number
+  headlineOffsetY?: number
+  headlineScale?: number
+
+  priceOffsetX?: number
+  priceOffsetY?: number
+  priceScale?: number
+
+  brandOffsetX?: number
+  brandOffsetY?: number
+
+  ctaOffsetX?: number
+  ctaOffsetY?: number
+  ctaScale?: number
+
   textAlign?: 'left' | 'center' | 'right'
   headline: string
   subheadline?: string
@@ -159,13 +178,17 @@ function loadImage(src: string): Promise<HTMLImageElement> {
         fallbackImg.src = fallbackCanvas.toDataURL()
         fallbackImg.onload = () => resolve(fallbackImg)
       }
-      retry.src = src
+      retry.src = '/sample-sala.jpg'
     }
 
     img.src = src
   })
 }
 
+/**
+ * Renderiza criativos profissionais de alta conversão diretamente no navegador via Canvas 2D
+ * Suporta 6 templates exclusivos, 100% de liberdade de edição de textos, valores e movimentação individual estilo Canva
+ */
 export async function renderCreativeCanvas(options: RenderCreativeOptions): Promise<string> {
   if (typeof window === 'undefined') return ''
 
@@ -191,9 +214,25 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
   const brandColor = options.brandColor || '#10b981'
   const accentColor = options.accentColor || '#f59e0b'
 
-  // Deslocamento dos textos na tela
-  const textShiftX = ((options.textOffsetX || 0) / 100) * width
-  const textShiftY = ((options.textOffsetY || 0) / 100) * height
+  // Deslocamento global (compatibilidade)
+  const globalShiftX = ((options.textOffsetX || 0) / 100) * width
+  const globalShiftY = ((options.textOffsetY || 0) / 100) * height
+
+  // Deslocamentos e escalas individuais (estilo Canva)
+  const headShiftX = (((options.headlineOffsetX || 0) / 100) * width) + globalShiftX
+  const headShiftY = (((options.headlineOffsetY || 0) / 100) * height) + globalShiftY
+  const headScale = Math.max(0.5, Math.min(2.0, options.headlineScale || 1.0))
+
+  const priceShiftX = (((options.priceOffsetX || 0) / 100) * width) + globalShiftX
+  const priceShiftY = (((options.priceOffsetY || 0) / 100) * height) + globalShiftY
+  const priceScale = Math.max(0.5, Math.min(2.0, options.priceScale || 1.0))
+
+  const brandShiftX = (((options.brandOffsetX || 0) / 100) * width) + globalShiftX * 0.3
+  const brandShiftY = (((options.brandOffsetY || 0) / 100) * height) + globalShiftY * 0.3
+
+  const ctaShiftX = (((options.ctaOffsetX || 0) / 100) * width) + globalShiftX * 0.3
+  const ctaShiftY = (((options.ctaOffsetY || 0) / 100) * height) + globalShiftY * 0.3
+  const ctaScale = Math.max(0.6, Math.min(1.6, options.ctaScale || 1.0))
 
   // Texto do botão de rodapé customizado
   const defaultCtaText = isEn
@@ -210,7 +249,7 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
   const drawCoverImage = () => {
     const imgAspect = img.width / img.height
     const canvasAspect = width / height
-    const scale = options.photoScale || 1.0
+    const scale = Math.max(0.5, options.photoScale || 1.0)
     const extraOffsetX = ((options.photoOffsetX || 0) / 100) * width
     const extraOffsetY = ((options.photoOffsetY || 0) / 100) * height
 
@@ -246,55 +285,66 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
     ctx.fillStyle = '#ffffff'
     ctx.font = 'bold 36px sans-serif'
     ctx.textAlign = 'center'
-    ctx.fillText(`✨ ${businessName.toUpperCase()} ✨`, width / 2 + textShiftX, (isStory ? 180 : 100) + textShiftY * 0.4)
+    ctx.fillText(`✨ ${businessName.toUpperCase()} ✨`, width / 2 + brandShiftX, (isStory ? 180 : 100) + brandShiftY)
 
     ctx.fillStyle = brandColor
     ctx.font = 'bold 22px sans-serif'
-    ctx.fillText(isEn ? 'SPECIAL OFFER' : 'OFERTA ESPECIAL', width / 2 + textShiftX, (isStory ? 230 : 145) + textShiftY * 0.4)
+    ctx.fillText(isEn ? 'SPECIAL OFFER' : 'OFERTA ESPECIAL', width / 2 + brandShiftX, (isStory ? 230 : 145) + brandShiftY)
 
-    // Centro: Badge de Preço / Destaque Secundário (deslocado por textShiftX / textShiftY)
+    // Centro: Badge de Preço / Destaque Secundário (deslocamento individual)
     if (hasPrice) {
-      const badgeY = (isStory ? height / 2 - 120 : height / 2 - 60) + textShiftY
-      const badgeX = width / 2 + textShiftX
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.82)'
+      const badgeY = (isStory ? height / 2 - 120 : height / 2 - 60) + priceShiftY
+      const badgeX = width / 2 + priceShiftX
+      const badgeW = 600 * priceScale
+      const badgeH = 200 * priceScale
+
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.85)'
       ctx.beginPath()
-      ctx.roundRect(badgeX - 300, badgeY - 100, 600, 200, 36)
+      ctx.roundRect(badgeX - badgeW / 2, badgeY - badgeH / 2, badgeW, badgeH, 36 * priceScale)
       ctx.fill()
       ctx.lineWidth = 6
       ctx.strokeStyle = brandColor
       ctx.stroke()
 
       ctx.fillStyle = accentColor
-      const fontSize = price.length > 10 ? '54px' : price.length > 6 ? '80px' : '100px'
-      ctx.font = `900 ${fontSize} sans-serif`
-      ctx.fillText(price, badgeX, badgeY + 25)
+      const baseFontSize = price.length > 10 ? 54 : price.length > 6 ? 80 : 100
+      ctx.font = `900 ${Math.round(baseFontSize * priceScale)}px sans-serif`
+      ctx.textAlign = 'center'
+      ctx.fillText(price, badgeX, badgeY + (25 * priceScale))
 
       // Headline abaixo do preço
       ctx.fillStyle = '#ffffff'
-      ctx.font = 'bold 44px sans-serif'
-      const headlineY = (isStory ? height / 2 + 220 : height / 2 + 200) + textShiftY
-      wrapText(ctx, options.headline.toUpperCase(), badgeX, headlineY, 860, 56, 3)
+      const headFont = Math.round(44 * headScale)
+      ctx.font = `bold ${headFont}px sans-serif`
+      const headlineY = (isStory ? height / 2 + 220 : height / 2 + 200) + headShiftY
+      const headlineX = width / 2 + headShiftX
+      wrapText(ctx, options.headline.toUpperCase(), headlineX, headlineY, 860, Math.round(56 * headScale), 3)
     } else {
-      // Sem preço: Headline centralizada e deslocável
+      // Sem preço: Headline centralizada
       ctx.fillStyle = '#ffffff'
-      ctx.font = 'bold 54px sans-serif'
-      const headlineY = (isStory ? height / 2 - 40 : height / 2 - 30) + textShiftY
-      const headlineX = width / 2 + textShiftX
-      wrapText(ctx, options.headline.toUpperCase(), headlineX, headlineY, 920, 68, 4)
+      const headFont = Math.round(54 * headScale)
+      ctx.font = `bold ${headFont}px sans-serif`
+      ctx.textAlign = 'center'
+      const headlineY = (isStory ? height / 2 - 40 : height / 2 - 30) + headShiftY
+      const headlineX = width / 2 + headShiftX
+      wrapText(ctx, options.headline.toUpperCase(), headlineX, headlineY, 920, Math.round(68 * headScale), 4)
     }
 
     // Rodapé
-    const footerY = (isStory ? height - 160 : height - 100) + textShiftY * 0.2
-    const footerX = width / 2 + textShiftX * 0.3
+    const footerY = (isStory ? height - 160 : height - 100) + ctaShiftY
+    const footerX = width / 2 + ctaShiftX
+    const btnW = 760 * ctaScale
+    const btnH = 90 * ctaScale
+
     ctx.fillStyle = brandColor
     ctx.beginPath()
-    ctx.roundRect(footerX - 380, footerY - 55, 760, 90, 45)
+    ctx.roundRect(footerX - btnW / 2, footerY - btnH / 2, btnW, btnH, 45 * ctaScale)
     ctx.fill()
 
     ctx.fillStyle = '#052e16'
-    ctx.font = 'bold 32px sans-serif'
+    ctx.font = `bold ${Math.round(32 * ctaScale)}px sans-serif`
     ctx.textAlign = 'center'
-    ctx.fillText(footerButtonText, footerX, footerY + 5)
+    ctx.fillText(footerButtonText, footerX, footerY + (6 * ctaScale))
   } else if (options.template === 'photo-overlay') {
     // ==================== TEMPLATE 2: PHOTO OVERLAY ====================
     drawCoverImage()
@@ -308,50 +358,55 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
 
     // Badge flutuante de preço / texto extra (se ativo)
     if (hasPrice) {
-      const badgeW = Math.max(260, price.length * 28 + 60)
-      const badgeX = width - badgeW - 60 + textShiftX
-      const badgeY = (isStory ? 140 : 60) + textShiftY * 0.5
+      const badgeW = Math.max(260, price.length * 28 + 60) * priceScale
+      const badgeH = 90 * priceScale
+      const badgeX = width - badgeW - 60 + priceShiftX
+      const badgeY = (isStory ? 140 : 60) + priceShiftY
 
       ctx.fillStyle = 'rgba(15, 46, 42, 0.92)'
       ctx.beginPath()
-      ctx.roundRect(badgeX, badgeY, badgeW, 90, 24)
+      ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 24 * priceScale)
       ctx.fill()
       ctx.lineWidth = 4
       ctx.strokeStyle = accentColor
       ctx.stroke()
 
       ctx.fillStyle = accentColor
-      const fSize = price.length > 10 ? '38px' : '48px'
-      ctx.font = `900 ${fSize} sans-serif`
+      const fSize = (price.length > 10 ? 38 : 48) * priceScale
+      ctx.font = `900 ${Math.round(fSize)}px sans-serif`
       ctx.textAlign = 'center'
-      ctx.fillText(price, badgeX + badgeW / 2, badgeY + 62)
+      ctx.fillText(price, badgeX + badgeW / 2, badgeY + (62 * priceScale))
     }
 
     // Card de Conteúdo Inferior (deslocável)
-    const contentX = 80 + textShiftX
-    const contentY = (isStory ? height - 520 : height - 380) + textShiftY
+    const contentX = 80 + headShiftX
+    const contentY = (isStory ? height - 520 : height - 380) + headShiftY
 
     ctx.textAlign = 'left'
     ctx.fillStyle = brandColor
     ctx.font = 'bold 28px sans-serif'
-    ctx.fillText(`✨ ${businessName.toUpperCase()}`, contentX, contentY)
+    ctx.fillText(`✨ ${businessName.toUpperCase()}`, 80 + brandShiftX, (isStory ? height - 560 : height - 420) + brandShiftY)
 
     ctx.fillStyle = '#ffffff'
-    ctx.font = 'bold 46px sans-serif'
-    wrapText(ctx, options.headline, contentX, contentY + 65, 920, 60, 3)
+    const headFont = Math.round(46 * headScale)
+    ctx.font = `bold ${headFont}px sans-serif`
+    wrapText(ctx, options.headline, contentX, contentY + 30, 920, Math.round(60 * headScale), 3)
 
     // Rodapé
-    const footerY = (isStory ? height - 160 : height - 100) + textShiftY * 0.2
-    const footerX = 80 + textShiftX * 0.3
+    const footerY = (isStory ? height - 160 : height - 100) + ctaShiftY
+    const footerX = 80 + ctaShiftX
+    const btnW = (width - 160) * ctaScale
+    const btnH = 85 * ctaScale
+
     ctx.fillStyle = '#10b981'
     ctx.beginPath()
-    ctx.roundRect(footerX, footerY - 50, width - 160, 85, 24)
+    ctx.roundRect(footerX, footerY - btnH / 2, btnW, btnH, 24)
     ctx.fill()
 
     ctx.fillStyle = '#052e16'
-    ctx.font = 'bold 32px sans-serif'
+    ctx.font = `bold ${Math.round(32 * ctaScale)}px sans-serif`
     ctx.textAlign = 'center'
-    ctx.fillText(footerButtonText, width / 2 + textShiftX * 0.3, footerY + 7)
+    ctx.fillText(footerButtonText, footerX + btnW / 2, footerY + (7 * ctaScale))
   } else if (options.template === 'clean-split') {
     // ==================== TEMPLATE 3: CLEAN SPLIT ====================
     ctx.fillStyle = '#0b0f17'
@@ -368,7 +423,7 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
 
     const imgAspect = img.width / img.height
     const boxAspect = photoW / (photoH - 60)
-    const scale = options.photoScale || 1.0
+    const scale = Math.max(0.5, options.photoScale || 1.0)
     const extraOffsetX = ((options.photoOffsetX || 0) / 100) * photoW
     const extraOffsetY = ((options.photoOffsetY || 0) / 100) * (photoH - 60)
 
@@ -394,38 +449,42 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
     ctx.roundRect(margin, margin + (isStory ? 80 : 20), photoW, photoH - 60, 36)
     ctx.stroke()
 
-    // Bloco de Textos inferior deslocável
-    const bottomStartY = (photoH + (isStory ? 100 : 40)) + textShiftY
-    const leftX = margin + textShiftX
+    // Bloco de Textos inferior
+    const bottomStartY = (photoH + (isStory ? 100 : 40))
 
     ctx.fillStyle = brandColor
     ctx.font = 'bold 26px sans-serif'
     ctx.textAlign = 'left'
-    ctx.fillText(`🏆 ${businessName.toUpperCase()}`, leftX, bottomStartY)
+    ctx.fillText(`🏆 ${businessName.toUpperCase()}`, margin + brandShiftX, bottomStartY + brandShiftY)
 
     if (hasPrice) {
       ctx.fillStyle = accentColor
-      const fSize = price.length > 10 ? '36px' : '48px'
-      ctx.font = `900 ${fSize} sans-serif`
+      const fSize = (price.length > 10 ? 36 : 48) * priceScale
+      ctx.font = `900 ${Math.round(fSize)}px sans-serif`
       ctx.textAlign = 'right'
-      ctx.fillText(price, width - margin + textShiftX, bottomStartY)
+      ctx.fillText(price, width - margin + priceShiftX, bottomStartY + priceShiftY)
     }
 
     ctx.fillStyle = '#ffffff'
-    ctx.font = 'bold 44px sans-serif'
+    const headFont = Math.round(44 * headScale)
+    ctx.font = `bold ${headFont}px sans-serif`
     ctx.textAlign = 'left'
-    wrapText(ctx, options.headline, leftX, bottomStartY + 65, photoW, 58, 3)
+    wrapText(ctx, options.headline, margin + headShiftX, bottomStartY + 65 + headShiftY, photoW, Math.round(58 * headScale), 3)
 
-    const footerY = (isStory ? height - 160 : height - 90) + textShiftY * 0.2
+    const footerY = (isStory ? height - 160 : height - 90) + ctaShiftY
+    const btnW = photoW * ctaScale
+    const btnH = 85 * ctaScale
+    const footerX = margin + ctaShiftX
+
     ctx.fillStyle = '#25D366'
     ctx.beginPath()
-    ctx.roundRect(margin + textShiftX * 0.3, footerY - 50, photoW, 85, 24)
+    ctx.roundRect(footerX, footerY - btnH / 2, btnW, btnH, 24)
     ctx.fill()
 
     ctx.fillStyle = '#052e16'
-    ctx.font = 'bold 32px sans-serif'
+    ctx.font = `bold ${Math.round(32 * ctaScale)}px sans-serif`
     ctx.textAlign = 'center'
-    ctx.fillText(footerButtonText, width / 2 + textShiftX * 0.3, footerY + 6)
+    ctx.fillText(footerButtonText, footerX + btnW / 2, footerY + (6 * ctaScale))
   } else if (options.template === 'proof-card') {
     // ==================== TEMPLATE 4: PROOF CARD (5 ESTRELAS) ====================
     drawCoverImage()
@@ -442,14 +501,14 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
     ctx.textAlign = 'center'
     ctx.fillStyle = '#ffffff'
     ctx.font = 'bold 32px sans-serif'
-    ctx.fillText(`✨ ${businessName.toUpperCase()}`, width / 2 + textShiftX, (isStory ? 160 : 80) + textShiftY * 0.4)
+    ctx.fillText(`✨ ${businessName.toUpperCase()}`, width / 2 + brandShiftX, (isStory ? 160 : 80) + brandShiftY)
 
-    // Card Central de Prova Social (movimentável via textShiftX / textShiftY)
-    const cardY = (isStory ? height / 2 - 160 : height / 2 - 110) + textShiftY
+    // Card Central de Prova Social (movimentável via headShiftX / headShiftY)
+    const cardY = (isStory ? height / 2 - 160 : height / 2 - 110) + headShiftY
     const cardW = 920
     const cardH = isStory ? 580 : 500
-    const cardX = (width - cardW) / 2 + textShiftX
-    const centerX = width / 2 + textShiftX
+    const cardX = (width - cardW) / 2 + headShiftX
+    const centerX = width / 2 + headShiftX
 
     ctx.fillStyle = 'rgba(15, 23, 42, 0.85)'
     ctx.beginPath()
@@ -468,29 +527,34 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
     ctx.fillText(isEn ? '5.0 RATED BY 100+ CLIENTS' : 'AVALIAÇÃO 5.0 • 100% SATISFAÇÃO', centerX, cardY + 115)
 
     ctx.fillStyle = '#ffffff'
-    ctx.font = 'bold 44px sans-serif'
-    wrapText(ctx, `“${options.headline}”`, centerX, cardY + 190, 820, 56, 3)
+    const headFont = Math.round(44 * headScale)
+    ctx.font = `bold ${headFont}px sans-serif`
+    wrapText(ctx, `“${options.headline}”`, centerX, cardY + 190, 820, Math.round(56 * headScale), 3)
 
     if (hasPrice) {
       ctx.fillStyle = accentColor
-      const fSize = price.length > 10 ? '48px' : '64px'
-      ctx.font = `900 ${fSize} sans-serif`
-      ctx.fillText(price, centerX, cardY + (isStory ? 430 : 380))
+      const fSize = (price.length > 10 ? 48 : 64) * priceScale
+      ctx.font = `900 ${Math.round(fSize)}px sans-serif`
+      ctx.fillText(price, centerX + priceShiftX - headShiftX, cardY + (isStory ? 430 : 380) + priceShiftY)
     }
 
     ctx.fillStyle = '#10b981'
     ctx.font = 'bold 22px sans-serif'
     ctx.fillText(isEn ? '🛡️ 100% Satisfaction Guaranteed' : '🛡️ Garantia de Excelência & Pontualidade', centerX, cardY + (hasPrice ? (isStory ? 480 : 430) : (isStory ? 400 : 350)))
 
-    const footerY = (isStory ? height - 160 : height - 90) + textShiftY * 0.2
+    const footerY = (isStory ? height - 160 : height - 90) + ctaShiftY
+    const btnW = cardW * ctaScale
+    const btnH = 85 * ctaScale
+    const footerX = width / 2 + ctaShiftX
+
     ctx.fillStyle = '#10b981'
     ctx.beginPath()
-    ctx.roundRect((width - cardW) / 2 + textShiftX * 0.3, footerY - 50, cardW, 85, 24)
+    ctx.roundRect(footerX - btnW / 2, footerY - btnH / 2, btnW, btnH, 24)
     ctx.fill()
 
     ctx.fillStyle = '#052e16'
-    ctx.font = 'bold 32px sans-serif'
-    ctx.fillText(footerButtonText, width / 2 + textShiftX * 0.3, footerY + 6)
+    ctx.font = `bold ${Math.round(32 * ctaScale)}px sans-serif`
+    ctx.fillText(footerButtonText, footerX, footerY + (6 * ctaScale))
   } else if (options.template === 'minimal-luxury') {
     // ==================== TEMPLATE 5: MINIMAL LUXURY ====================
     ctx.fillStyle = '#08080a'
@@ -508,11 +572,11 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
     ctx.textAlign = 'center'
     ctx.fillStyle = '#d4af37'
     ctx.font = 'bold 20px serif'
-    ctx.fillText(`— ${businessName.toUpperCase()} —`, width / 2 + textShiftX, (isStory ? 140 : 100) + textShiftY * 0.4)
+    ctx.fillText(`— ${businessName.toUpperCase()} —`, width / 2 + brandShiftX, (isStory ? 140 : 100) + brandShiftY)
 
     ctx.fillStyle = '#ffffff'
     ctx.font = '300 16px sans-serif'
-    ctx.fillText(isEn ? 'PREMIUM & RELIABLE SERVICE' : 'SERVIÇO PREMIUM & EXCLUSIVO', width / 2 + textShiftX, (isStory ? 180 : 135) + textShiftY * 0.4)
+    ctx.fillText(isEn ? 'PREMIUM & RELIABLE SERVICE' : 'SERVIÇO PREMIUM & EXCLUSIVO', width / 2 + brandShiftX, (isStory ? 180 : 135) + brandShiftY)
 
     const photoSize = isStory ? 600 : 480
     const photoY = isStory ? 240 : 180
@@ -524,7 +588,7 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
     ctx.clip()
 
     const imgAspect = img.width / img.height
-    const scale = options.photoScale || 1.0
+    const scale = Math.max(0.5, options.photoScale || 1.0)
     const extraOffsetX = ((options.photoOffsetX || 0) / 100) * photoSize
     const extraOffsetY = ((options.photoOffsetY || 0) / 100) * photoSize
 
@@ -551,24 +615,25 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
     ctx.stroke()
 
     // Conteúdo Inferior Deslocável
-    const contentStartY = (photoY + photoSize + (isStory ? 70 : 45)) + textShiftY
-    const centerX = width / 2 + textShiftX
+    const contentStartY = (photoY + photoSize + (isStory ? 70 : 45)) + headShiftY
+    const centerX = width / 2 + headShiftX
 
     ctx.fillStyle = '#ffffff'
-    ctx.font = 'bold 38px serif'
-    wrapText(ctx, options.headline, centerX, contentStartY, 880, 50, 2)
+    const headFont = Math.round(38 * headScale)
+    ctx.font = `bold ${headFont}px serif`
+    wrapText(ctx, options.headline, centerX, contentStartY, 880, Math.round(50 * headScale), 2)
 
     if (hasPrice) {
       ctx.fillStyle = '#d4af37'
-      const fSize = price.length > 10 ? '38px' : '50px'
-      ctx.font = `bold ${fSize} sans-serif`
-      ctx.fillText(price, centerX, contentStartY + (isStory ? 140 : 110))
+      const fSize = (price.length > 10 ? 38 : 50) * priceScale
+      ctx.font = `bold ${Math.round(fSize)}px sans-serif`
+      ctx.fillText(price, width / 2 + priceShiftX, contentStartY + (isStory ? 140 : 110) + priceShiftY)
     }
 
-    const footerY = (isStory ? height - 140 : height - 85) + textShiftY * 0.2
+    const footerY = (isStory ? height - 140 : height - 85) + ctaShiftY
     ctx.fillStyle = '#d4af37'
-    ctx.font = 'bold 24px sans-serif'
-    ctx.fillText(footerButtonText, width / 2 + textShiftX * 0.3, footerY)
+    ctx.font = `bold ${Math.round(24 * ctaScale)}px sans-serif`
+    ctx.fillText(footerButtonText, width / 2 + ctaShiftX, footerY)
   } else if (options.template === 'urgent-promo') {
     // ==================== TEMPLATE 6: URGENT PROMO (URGÊNCIA & FLASH SALE) ====================
     drawCoverImage()
@@ -589,43 +654,51 @@ export async function renderCreativeCanvas(options: RenderCreativeOptions): Prom
     ctx.textAlign = 'center'
     ctx.fillText(isEn ? '🔥 LIMITED TIME OFFER • ONLY THIS WEEK' : '🔥 ÚLTIMAS VAGAS • SOMENTE ESSA SEMANA', width / 2, isStory ? 125 : 75)
 
-    const centerX = width / 2 + textShiftX
+    const centerX = width / 2 + brandShiftX
 
     ctx.fillStyle = '#e2e8f0'
     ctx.font = 'bold 32px sans-serif'
-    ctx.fillText(businessName.toUpperCase(), centerX, (isStory ? 220 : 155) + textShiftY * 0.4)
+    ctx.fillText(businessName.toUpperCase(), centerX, (isStory ? 220 : 155) + brandShiftY)
 
     ctx.fillStyle = '#ffffff'
-    ctx.font = '900 48px sans-serif'
-    const headlineY = (isStory ? height / 2 - 80 : height / 2 - 30) + textShiftY
-    wrapText(ctx, options.headline.toUpperCase(), centerX, headlineY, 920, 60, 3)
+    const headFont = Math.round(48 * headScale)
+    ctx.font = `900 ${headFont}px sans-serif`
+    const headlineY = (isStory ? height / 2 - 80 : height / 2 - 30) + headShiftY
+    wrapText(ctx, options.headline.toUpperCase(), width / 2 + headShiftX, headlineY, 920, Math.round(60 * headScale), 3)
 
     if (hasPrice) {
-      const badgeY = (isStory ? height / 2 + 180 : height / 2 + 160) + textShiftY
-      const badgeW = Math.max(520, price.length * 30 + 80)
+      const badgeY = (isStory ? height / 2 + 180 : height / 2 + 160) + priceShiftY
+      const badgeW = Math.max(520, price.length * 30 + 80) * priceScale
+      const badgeH = 140 * priceScale
+      const bX = width / 2 + priceShiftX
+
       ctx.fillStyle = '#f59e0b'
       ctx.beginPath()
-      ctx.roundRect(centerX - badgeW / 2, badgeY - 70, badgeW, 140, 28)
+      ctx.roundRect(bX - badgeW / 2, badgeY - badgeH / 2, badgeW, badgeH, 28 * priceScale)
       ctx.fill()
 
       ctx.fillStyle = '#0f172a'
-      const fSize = price.length > 10 ? '56px' : '80px'
-      ctx.font = `900 ${fSize} sans-serif`
-      ctx.fillText(price, centerX, badgeY + 30)
+      const fSize = (price.length > 10 ? 56 : 80) * priceScale
+      ctx.font = `900 ${Math.round(fSize)}px sans-serif`
+      ctx.fillText(price, bX, badgeY + (30 * priceScale))
     }
 
-    const footerY = (isStory ? height - 160 : height - 90) + textShiftY * 0.2
+    const footerY = (isStory ? height - 160 : height - 90) + ctaShiftY
+    const footerX = width / 2 + ctaShiftX
+    const btnW = 760 * ctaScale
+    const btnH = 95 * ctaScale
+
     ctx.fillStyle = '#10b981'
     ctx.beginPath()
-    ctx.roundRect(centerX - 380, footerY - 55, 760, 95, 48)
+    ctx.roundRect(footerX - btnW / 2, footerY - btnH / 2, btnW, btnH, 48 * ctaScale)
     ctx.fill()
     ctx.lineWidth = 4
     ctx.strokeStyle = '#34d399'
     ctx.stroke()
 
     ctx.fillStyle = '#052e16'
-    ctx.font = '900 34px sans-serif'
-    ctx.fillText(footerButtonText, centerX, footerY + 8)
+    ctx.font = `900 ${Math.round(34 * ctaScale)}px sans-serif`
+    ctx.fillText(footerButtonText, footerX, footerY + (8 * ctaScale))
   }
 
   if (options.withWatermark) {
